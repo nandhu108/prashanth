@@ -4,6 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const publicEventRoutes = require('./publicEventRoutes');
 const adminAuthRoutes = require('./adminAuthRoutes');
+const adminEventRoutes = require('./adminEventRoutes');
+const adminUploadRoutes = require('./adminUploadRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -21,10 +23,11 @@ router.get('/health', (req, res) => {
 
 router.use('/public', publicEventRoutes);
 router.use('/admin/auth', adminAuthRoutes);
+router.use('/admin/events', adminEventRoutes);
+router.use('/admin/uploads', adminUploadRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
- *   router.use('/admin/events',        adminEventRoutes);        // Module 2  - Event CMS
  *   router.use('/registrations',       registrationRoutes);      // Module 3  - Registration (public)
  *   router.use('/admin/registrations', adminRegistrationRoutes); // Module 3  - Registration (admin)
  *   router.use('/admin/ticket-types',  adminTicketTypeRoutes);   // Module 4  - Ticketing

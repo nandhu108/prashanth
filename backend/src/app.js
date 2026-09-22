@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 const env = require('./config/env');
+const { uploadDir } = require('./config/uploadPath');
 const routes = require('./routes');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
@@ -54,6 +55,13 @@ app.use(
     legacyHeaders: false,
     message: { success: false, error: { message: 'Too many requests. Please try again shortly.' } },
   })
+);
+
+// Event/speaker/sponsor imagery uploaded via the CMS. Long-cached since
+// filenames are random and never reused.
+app.use(
+  '/uploads',
+  express.static(uploadDir, { maxAge: '30d', immutable: true })
 );
 
 app.get('/', (req, res) => {

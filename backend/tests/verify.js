@@ -403,6 +403,30 @@ const base = 'http://127.0.0.1:5099';
     return r.body.error.message;
   });
 
+  console.log('\n=== 6. Admin CMS & uploads: routes are guarded ===');
+
+  const guardedRoutes = [
+    ['GET', '/api/v1/admin/events'],
+    ['POST', '/api/v1/admin/events'],
+    ['GET', '/api/v1/admin/events/000000000000000000000000'],
+    ['PATCH', '/api/v1/admin/events/000000000000000000000000'],
+    ['DELETE', '/api/v1/admin/events/000000000000000000000000'],
+    ['PUT', '/api/v1/admin/events/000000000000000000000000/speakers'],
+    ['POST', '/api/v1/admin/uploads'],
+  ];
+
+  for (const [method, path] of guardedRoutes) {
+    // eslint-disable-next-line no-await-in-loop
+    const res = await fetch(base + path, { method });
+    // eslint-disable-next-line no-await-in-loop
+    const body = await res.json();
+    check(`${method} ${path} without a token -> 401`, () => {
+      assert(res.status === 401, 'status ' + res.status);
+      assert(body.success === false);
+      return 'guarded';
+    });
+  }
+
   server.close();
   console.log(`\n=== ${pass} passed, ${fail} failed ===\n`);
   process.exit(fail ? 1 : 0);

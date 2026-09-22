@@ -81,6 +81,7 @@ services:
       context: ./frontend-admin
       args:
         VITE_API_BASE_URL: ''
+        VITE_PUBLIC_SITE_URL: 'http://localhost:8080'
     container_name: prashanth-admin
     restart: unless-stopped
     depends_on:

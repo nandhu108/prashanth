@@ -22,12 +22,27 @@ mobile nav drawer) confirm the premium split-screen login and sidebar shell with
 zero console errors. Role-gated nav items (`Users & roles`, `Audit log`) only
 render for `superadmin`.
 
-## Module 2 — Event CMS
-- [ ] Admin CRUD for Event (details, venue, theme, seo, organizer, contact)
-- [ ] Sub-resource CRUD: speakers, agenda days/items, sponsors, faqs, announcements
-- [ ] Image upload (multer → `/uploads`, static-served)
-- [ ] `frontend-admin` Event Editor (tabbed UI)
-- [ ] Verified in Docker + screenshots
+## Module 2 — Event CMS ✅
+- [x] Admin CRUD for Event (details, venue, theme, seo, organizer, contact)
+- [x] Sub-resource CRUD: speakers, agenda days/items, sponsors, faqs, announcements
+- [x] Image upload (multer → `/uploads`, static-served, 5MB limit, image-only)
+- [x] `frontend-admin` Event Editor (8-tab UI: Details, Venue & Contact, Theme &
+      SEO, Speakers, Agenda, Sponsors, FAQ, Announcements)
+- [x] Verified in Docker + screenshots
+
+Verified: logged in as superadmin, edited the tagline through the Details tab
+and confirmed the change round-tripped to the public microsite's `/public/events/:slug`
+payload live; replaced the FAQ array via the CMS and confirmed it too. Ran the
+full 8-tab editor against the real seeded event (6 speakers, nested
+day→session agenda, 5 sponsors) via Playwright — all tabs render real data
+correctly, the nested agenda editor (days containing sessions) works, and
+Save round-trips through PATCH/PUT correctly. Found and fixed one real bug
+during review: `ImageUploadField` rendered a blank white box instead of the
+neutral placeholder icon when a stored image URL 404s (e.g. the seed data's
+placeholder `/assets/logo-prashanth.svg`) — switched from a CSS
+background-image to an `<img onError>` with a broken-state fallback.
+`checkin_staff` role is correctly excluded from all `/admin/events/*` routes
+(manager+ only). Re-seeded after testing to restore the original demo content.
 
 ## Module 4 — Ticketing & Pass Types
 - [ ] Admin CRUD + reorder for TicketType
