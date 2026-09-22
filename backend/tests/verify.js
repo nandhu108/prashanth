@@ -6,6 +6,7 @@ process.env.NODE_ENV = 'development';
 const mongoose = require('mongoose');
 const Event = require('../src/models/Event');
 const TicketType = require('../src/models/TicketType');
+const PromoCode = require('../src/models/PromoCode');
 const {
   serializeEventForPublic,
   serializeTicketTypeForPublic,
@@ -417,6 +418,10 @@ const base = 'http://127.0.0.1:5099';
     ['POST', '/api/v1/admin/ticket-types'],
     ['PATCH', '/api/v1/admin/ticket-types/000000000000000000000000'],
     ['DELETE', '/api/v1/admin/ticket-types/000000000000000000000000'],
+    ['GET', '/api/v1/admin/promo'],
+    ['POST', '/api/v1/admin/promo'],
+    ['PATCH', '/api/v1/admin/promo/000000000000000000000000'],
+    ['DELETE', '/api/v1/admin/promo/000000000000000000000000'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -430,6 +435,48 @@ const base = 'http://127.0.0.1:5099';
       return 'guarded';
     });
   }
+
+  console.log('\n=== 7. PromoCode model: discount math & validity window ===');
+
+  const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
+
+  check('percent discount rounds to the nearest paisa', () => {
+    const p = mkPromo({ type: 'percent', value: 15 });
+    assert(p.computeDiscount(2500) === 375, 'got ' + p.computeDiscount(2500));
+    return '15% of Rs.2500 = Rs.375';
+  });
+
+  check('flat discount never exceeds the base price', () => {
+    const p = mkPromo({ type: 'flat', value: 5000 });
+    assert(p.computeDiscount(2500) === 2500, 'got ' + p.computeDiscount(2500));
+    return 'capped at Rs.2500';
+  });
+
+  check('code outside its date window is not valid now', () => {
+    const p = mkPromo({ validFrom: days(1) });
+    assert(p.isValidNow === false, 'expected invalid before validFrom');
+    return 'not-yet-open';
+  });
+
+  check('code past its max uses is not valid now', () => {
+    const p = mkPromo({ maxUses: 5, usedCount: 5 });
+    assert(p.isValidNow === false, 'expected invalid once exhausted');
+    assert(p.usesRemaining === 0);
+    return 'exhausted';
+  });
+
+  check('unlimited-use code (maxUses 0) always has uses remaining', () => {
+    const p = mkPromo({ maxUses: 0, usedCount: 999 });
+    assert(p.usesRemaining === null, 'got ' + p.usesRemaining);
+    return 'unlimited';
+  });
+
+  check('rejects validTo before validFrom', () => {
+    const p = mkPromo({ validFrom: days(10), validTo: days(5) });
+    const err = p.validateSync();
+    assert(err && err.errors.validTo, 'expected a validation error');
+    return err.errors.validTo.message;
+  });
 
   server.close();
   console.log(`\n=== ${pass} passed, ${fail} failed ===\n`);

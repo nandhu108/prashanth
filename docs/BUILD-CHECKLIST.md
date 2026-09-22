@@ -7,6 +7,7 @@ Playwright screenshots for UI-heavy modules). See
 reference as it grows.
 
 ## Foundation — Auth & RBAC ✅
+
 - [x] `User` model + `bcryptjs`/`jsonwebtoken` utils + `requireAuth`/`requireRole` middleware
 - [x] `POST /api/v1/admin/auth/login` (rate-limited + lockout), `GET /api/v1/admin/auth/me`
 - [x] `seed/seedAdmin.js` idempotent superadmin bootstrap
@@ -23,11 +24,11 @@ zero console errors. Role-gated nav items (`Users & roles`, `Audit log`) only
 render for `superadmin`.
 
 ## Module 2 — Event CMS ✅
+
 - [x] Admin CRUD for Event (details, venue, theme, seo, organizer, contact)
 - [x] Sub-resource CRUD: speakers, agenda days/items, sponsors, faqs, announcements
 - [x] Image upload (multer → `/uploads`, static-served, 5MB limit, image-only)
-- [x] `frontend-admin` Event Editor (8-tab UI: Details, Venue & Contact, Theme &
-      SEO, Speakers, Agenda, Sponsors, FAQ, Announcements)
+- [x] `frontend-admin` Event Editor (8-tab UI: Details, Venue & Contact, Theme & SEO, Speakers, Agenda, Sponsors, FAQ, Announcements)
 - [x] Verified in Docker + screenshots
 
 Verified: logged in as superadmin, edited the tagline through the Details tab
@@ -45,6 +46,7 @@ background-image to an `<img onError>` with a broken-state fallback.
 (manager+ only). Re-seeded after testing to restore the original demo content.
 
 ## Module 4 — Ticketing & Pass Types ✅
+
 - [x] Admin CRUD for TicketType (create/update/delete, manager+ only)
 - [x] `frontend-admin` Ticket Types page (live sold/held/available inventory)
 - [x] Verified
@@ -56,13 +58,25 @@ blocked server-side once `quantitySold > 0` (409 conflict) — deactivate
 instead of delete once a pass has sales. `tests/verify.js` extended with
 route-guard checks (52/52 passing). Zero console errors.
 
-## Module 5 — Promo Code Management
-- [ ] PromoCode model + admin CRUD
-- [ ] Public `POST /api/v1/promo/validate`
-- [ ] `frontend-admin` Promo Codes page
-- [ ] Verified
+## Module 5 — Promo Code Management ✅
+
+- [x] PromoCode model + admin CRUD
+- [x] Public `POST /api/v1/promo/validate`
+- [x] `frontend-admin` Promo Codes page
+- [x] Verified
+
+Verified: created a real 20%-off code through the admin UI, then hit the
+public `/api/v1/promo/validate` endpoint directly — correctly computed
+₹500 off a ₹2500 pass (final ₹2000), and correctly rejected an unknown code
+with `valid:false`. Delete is blocked once a code has been redeemed
+(`usedCount > 0`, 409), same pattern as ticket-type delete. Model-level
+checks (discount rounding, flat-discount capping, expiry window, exhausted
+max-uses, unlimited-use codes, validTo/validFrom ordering) all covered in
+`tests/verify.js` without needing a DB (62/62 passing). Test code cleaned
+up afterward.
 
 ## Module 3 — Registration Management
+
 - [ ] Inventory hold/release service (`services/inventory.js`)
 - [ ] Public `POST /api/v1/registrations`
 - [ ] Admin registration list/search/filter/detail/cancel/resend
@@ -71,60 +85,71 @@ route-guard checks (52/52 passing). Zero console errors.
 - [ ] Verified
 
 ## Module 6 — Payment Gateway
+
 - [ ] Razorpay order creation, signature verify, webhook (idempotent)
 - [ ] Inventory hold→sold commit on payment confirm
 - [ ] `frontend-public` checkout step (Razorpay Checkout.js)
 - [ ] Verified (HMAC fixtures now; real test-mode charge once keys supplied)
 
 ## Module 7 — Digital Ticket & QR
+
 - [ ] QR token generation, `utils/ticketPdf.js` (pdfkit)
 - [ ] `GET /api/v1/tickets/:qrToken` + `/pdf`
 - [ ] `frontend-public` Ticket page
 - [ ] Verified
 
 ## Module 8 — WhatsApp Integration
+
 - [ ] Meta Cloud API client (dev-safe no-op without credentials)
 - [ ] Send ticket confirmation on payment/free-registration confirm
 - [ ] Admin manual resend endpoint
 - [ ] Verified (log-based, real send once keys supplied)
 
 ## Module 9 — Event-Day Check-in
+
 - [ ] `POST /api/v1/admin/checkin/scan`, stats endpoint
 - [ ] `frontend-admin` Check-in scanner page (camera + manual)
 - [ ] Verified
 
 ## Module 10 — Admin Dashboard
+
 - [ ] Overview page (stat tiles + charts)
 - [ ] Users/role management (superadmin only)
 - [ ] Full nav shell polish across all admin pages
 - [ ] Verified + screenshots
 
 ## Module 11 — Reports & Export
+
 - [ ] Aggregation endpoint + CSV export utility
 - [ ] `frontend-admin` Reports page
 - [ ] Verified
 
 ## Module 12 — Feedback & Certificates
+
 - [ ] Feedback model + public submit endpoint
 - [ ] On-the-fly certificate PDF (`/tickets/:qrToken/certificate.pdf`)
 - [ ] `frontend-public` Feedback page; `frontend-admin` Feedback page
 - [ ] Verified
 
 ## Module 13 — Security & Access Control
+
 - [ ] AuditLog model + `recordAudit()` wired into admin mutations
 - [ ] Login lockout verified; CORS admin origin added
 - [ ] `frontend-admin` Audit Log page
 - [ ] Role matrix documented in `docs/API.md`
 
 ## Module 14 — Deployment & Go-Live
+
 - [ ] docker-compose finalized (mongo/api/web/admin + uploads volume)
 - [ ] GitHub Actions CI (`verify` + builds)
 - [ ] `scripts/backup-mongo.sh`
 - [ ] `docs/DEPLOYMENT.md` updated
 
 ## Module 15 — Support
+
 - [ ] `docs/SUPPORT.md` ops runbook + staff FAQ
 - [ ] `frontend-admin` Help page
 
 ## Final demo
+
 - [ ] Full click-through: register → pay → ticket → check-in → certificate → reports, screenshots captured
