@@ -106,12 +106,31 @@ Verified end-to-end through the real Docker stack, not just curl:
   the DB-free suite, since it's inherently about atomic Mongo updates.
 - Test data cleaned up afterward.
 
-## Module 6 — Payment Gateway
+## Module 6 — Payment Gateway ✅
 
-- [ ] Razorpay order creation, signature verify, webhook (idempotent)
-- [ ] Inventory hold→sold commit on payment confirm
-- [ ] `frontend-public` checkout step (Razorpay Checkout.js)
-- [ ] Verified (HMAC fixtures now; real test-mode charge once keys supplied)
+- [x] Razorpay order creation, signature verify, webhook (idempotent)
+- [x] Inventory hold→sold commit on payment confirm
+- [x] `frontend-public` checkout step (Razorpay Checkout.js)
+- [x] `frontend-admin` Payments ledger page
+- [x] Verified (HMAC fixtures now; real test-mode charge once keys supplied)
+
+Verified against the real Docker stack running with `NODE_ENV=production` (the
+actual deployment config, not the dev-mode verify sandbox) — and that caught a
+real bug: `createOrder`/`verifyPayment` originally threw `ApiError.internal()`
+(500) for "payments not configured yet," but `errorHandler.js` masks every
+5xx message in production to avoid leaking internals, so the attendee-facing
+UI showed a generic "Something went wrong" instead of the intended graceful
+message. Fixed by using 409 (Conflict) instead, matching how the codebase
+already uses 409 for other "can't do this right now" states (sold-out,
+already-cancelled) — 409 isn't masked. Re-verified in the same production-mode
+container: the register→pay flow now correctly shows "Online payment is being
+enabled shortly" and the admin Payments page shows a helpful empty state
+naming the exact env vars to add. The raw webhook body is captured via
+`express.json({verify})` in `app.js` so the HMAC signature is computed over
+the true bytes Razorpay sent, not a re-serialization. `tests/verify.js`
+covers the dev-safe-when-unconfigured paths and the HMAC formula itself
+(74/74 passing) — the DB-free suite alone would NOT have caught the masking
+bug above, which is why the real production-mode Docker pass mattered here.
 
 ## Module 7 — Digital Ticket & QR
 

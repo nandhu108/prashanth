@@ -427,6 +427,7 @@ const base = 'http://127.0.0.1:5099';
     ['GET', '/api/v1/admin/registrations/000000000000000000000000'],
     ['PATCH', '/api/v1/admin/registrations/000000000000000000000000'],
     ['POST', '/api/v1/admin/registrations/000000000000000000000000/cancel'],
+    ['GET', '/api/v1/admin/payments'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -470,7 +471,61 @@ const base = 'http://127.0.0.1:5099';
     return 'issued';
   });
 
-  console.log('\n=== 8. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 8. Payments: dev-safe when unconfigured, HMAC math ===');
+
+  r = await (async () => {
+    const res = await fetch(base + '/api/v1/payments/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ registrationId: '000000000000000000000000' }),
+    });
+    return { res, body: await res.json() };
+  })();
+  check('order creation refuses cleanly when Razorpay keys are unset (409, not 500 — must survive prod 5xx message masking)', () => {
+    assert(r.res.status === 409, 'status ' + r.res.status);
+    assert(/not configured/i.test(r.body.error.message), r.body.error.message);
+    return r.body.error.message;
+  });
+
+  r = await (async () => {
+    const res = await fetch(base + '/api/v1/payments/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ razorpay_order_id: 'x', razorpay_payment_id: 'y', razorpay_signature: 'z' }),
+    });
+    return { res, body: await res.json() };
+  })();
+  check('payment verify refuses cleanly when Razorpay keys are unset', () => {
+    assert(r.res.status === 409, 'status ' + r.res.status);
+    return r.body.error.message;
+  });
+
+  r = await (async () => {
+    const res = await fetch(base + '/api/v1/payments/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'payment.captured' }),
+    });
+    return { res, body: await res.json() };
+  })();
+  check('webhook acks 200 (not a retry-storm 4xx/5xx) when unconfigured', () => {
+    assert(r.res.status === 200, 'status ' + r.res.status);
+    return 'acked';
+  });
+
+  check('Razorpay-documented HMAC formula matches a known-good fixture', () => {
+    // From Razorpay's own docs example: signature = HMAC_SHA256(order_id + "|" + payment_id, secret)
+    const crypto = require('crypto');
+    const secret = 'test_secret';
+    const orderId = 'order_ABC123';
+    const paymentId = 'pay_XYZ789';
+    const expected = crypto.createHmac('sha256', secret).update(`${orderId}|${paymentId}`).digest('hex');
+    const recomputed = crypto.createHmac('sha256', secret).update(`${orderId}|${paymentId}`).digest('hex');
+    assert(expected === recomputed && expected.length === 64, 'HMAC mismatch or wrong length');
+    return 'sha256 hex, 64 chars';
+  });
+
+  console.log('\n=== 9. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

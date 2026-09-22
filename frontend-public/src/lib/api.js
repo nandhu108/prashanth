@@ -57,4 +57,8 @@ export const api = {
     request('/promo/validate', { method: 'POST', body: JSON.stringify({ code, ticketTypeId }), ...opts }),
   register: (payload, opts) =>
     request('/registrations', { method: 'POST', body: JSON.stringify(payload), ...opts }),
+  createPaymentOrder: (registrationId, opts) =>
+    request('/payments/orders', { method: 'POST', body: JSON.stringify({ registrationId }), ...opts }),
+  verifyPayment: (payload, opts) =>
+    request('/payments/verify', { method: 'POST', body: JSON.stringify(payload), ...opts }),
 };

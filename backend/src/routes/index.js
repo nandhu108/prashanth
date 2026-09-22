@@ -11,6 +11,8 @@ const adminPromoRoutes = require('./adminPromoRoutes');
 const publicPromoRoutes = require('./publicPromoRoutes');
 const publicRegistrationRoutes = require('./publicRegistrationRoutes');
 const adminRegistrationRoutes = require('./adminRegistrationRoutes');
+const publicPaymentRoutes = require('./publicPaymentRoutes');
+const adminPaymentRoutes = require('./adminPaymentRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -35,10 +37,11 @@ router.use('/admin/promo', adminPromoRoutes);
 router.use('/promo', publicPromoRoutes);
 router.use('/registrations', publicRegistrationRoutes);
 router.use('/admin/registrations', adminRegistrationRoutes);
+router.use('/payments', publicPaymentRoutes);
+router.use('/admin/payments', adminPaymentRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
- *   router.use('/payments',            paymentRoutes);           // Module 6  - Gateway
  *   router.use('/tickets',             ticketRoutes);            // Module 7  - Digital ticket & QR
  *   router.use('/admin/checkin',       checkinRoutes);           // Module 9  - Event-day
  *   router.use('/admin/reports',       reportRoutes);            // Module 11 - Reports

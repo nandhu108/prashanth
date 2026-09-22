@@ -10,6 +10,7 @@ import { LoadingState, ErrorState, NotFoundState } from '../components/ui/States
 import { api, ApiError } from '../lib/api';
 import { formatCurrency } from '../lib/format';
 import { captureCampaign, getCampaign } from '../lib/campaign';
+import { openRazorpayCheckout } from '../lib/razorpay';
 import './RegisterPage.css';
 
 const DEFAULT_SLUG = import.meta.env.VITE_DEFAULT_EVENT_SLUG || 'fertility-gynaecology-summit-2026';
@@ -139,21 +140,18 @@ export default function RegisterPage() {
             </p>
 
             {result.status === 'confirmed' ? (
-              <p className="register-success__note">
-                A confirmation with your digital ticket will be sent to <strong>{result.attendee.email}</strong>{' '}
-                and on WhatsApp shortly.
-              </p>
+              <>
+                <p className="register-success__note">
+                  A confirmation with your digital ticket will be sent to <strong>{result.attendee.email}</strong>{' '}
+                  and on WhatsApp shortly.
+                </p>
+                <Button variant="primary" href={`/events/${slug}`}>
+                  Back to event
+                </Button>
+              </>
             ) : (
-              <p className="register-success__note">
-                Your pass is reserved for {import.meta.env.VITE_HOLD_MINUTES || 15} minutes. Online payment is
-                being enabled shortly — our team will also reach out on WhatsApp/phone to complete your
-                registration for <strong>{formatCurrency(result.pricing.totalAmount)}</strong>.
-              </p>
+              <PendingPaymentPanel registration={result} onConfirmed={setResult} eventSlug={slug} />
             )}
-
-            <Button variant="primary" href={`/events/${slug}`}>
-              Back to event
-            </Button>
           </div>
         </main>
         <SiteFooter event={event} />
@@ -282,6 +280,80 @@ export default function RegisterPage() {
         </div>
       </main>
       <SiteFooter event={event} />
+    </>
+  );
+}
+
+function PendingPaymentPanel({ registration, onConfirmed, eventSlug }) {
+  const [paying, setPaying] = useState(false);
+  const [error, setError] = useState('');
+  const [notConfigured, setNotConfigured] = useState(false);
+
+  async function handlePayNow() {
+    setPaying(true);
+    setError('');
+    try {
+      const orderRes = await api.createPaymentOrder(registration.id);
+      const order = orderRes.data;
+
+      const checkoutResult = await openRazorpayCheckout({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: 'Prashanth Hospitals',
+        description: `Registration ${order.registrationCode}`,
+        prefill: {
+          name: order.attendee?.name,
+          email: order.attendee?.email,
+          contact: order.attendee?.phone,
+        },
+        theme: { color: '#0E5C8A' },
+      });
+
+      const verifyRes = await api.verifyPayment({
+        razorpay_order_id: checkoutResult.razorpay_order_id,
+        razorpay_payment_id: checkoutResult.razorpay_payment_id,
+        razorpay_signature: checkoutResult.razorpay_signature,
+      });
+      onConfirmed(verifyRes.data);
+    } catch (err) {
+      if (err instanceof ApiError && /not configured/i.test(err.message)) {
+        setNotConfigured(true);
+      } else {
+        setError(err.message || 'Something went wrong. Please try again.');
+      }
+    } finally {
+      setPaying(false);
+    }
+  }
+
+  return (
+    <>
+      <p className="register-success__note">
+        Your pass is reserved for a short while for{' '}
+        <strong>{formatCurrency(registration.pricing.totalAmount)}</strong>.
+      </p>
+
+      {notConfigured ? (
+        <p className="register-success__note">
+          Online payment is being enabled shortly — our team will reach out on WhatsApp/phone to
+          complete your registration.
+        </p>
+      ) : (
+        <>
+          {error && <p className="register-error" style={{ textAlign: 'left' }}>{error}</p>}
+          <Button variant="primary" size="lg" onClick={handlePayNow} disabled={paying} fullWidth>
+            {paying ? 'Opening payment…' : `Pay ${formatCurrency(registration.pricing.totalAmount)}`}
+          </Button>
+        </>
+      )}
+
+      <div style={{ marginTop: 16 }}>
+        <Button variant="secondary" href={`/events/${eventSlug}`}>
+          Back to event
+        </Button>
+      </div>
     </>
   );
 }
