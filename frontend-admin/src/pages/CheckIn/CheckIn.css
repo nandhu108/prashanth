@@ -1,0 +1,105 @@
+.checkin-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .checkin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkin-camera {
+  width: 100%;
+  min-height: 260px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--ink-900);
+}
+
+.checkin-camera__hint {
+  text-align: center;
+  color: var(--ink-500);
+  font-size: var(--text-sm);
+  margin-top: var(--space-3);
+}
+
+.checkin-manual {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ink-100);
+}
+
+.checkin-manual input {
+  flex: 1;
+}
+
+.checkin-result {
+  min-height: 340px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-8);
+  transition: background var(--transition), border-color var(--transition);
+  border: 2px solid var(--ink-200);
+  background: var(--white);
+}
+
+.checkin-result__idle {
+  color: var(--ink-400);
+  font-size: var(--text-lg);
+}
+
+.checkin-result h3 {
+  font-size: var(--text-3xl);
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.checkin-result__name {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}
+
+.checkin-result__meta {
+  color: inherit;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.checkin-result__icon {
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.checkin-result--success {
+  background: var(--success-500);
+  border-color: var(--success-700);
+  color: var(--white);
+}
+
+.checkin-result--warning {
+  background: var(--warning-500);
+  border-color: var(--warning-700);
+  color: var(--white);
+}
+
+.checkin-result--error {
+  background: var(--danger-500);
+  border-color: var(--danger-700);
+  color: var(--white);
+}

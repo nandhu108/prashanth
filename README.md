@@ -46,8 +46,8 @@ This repository is being delivered **module by module**. This is the state after
 | 6   | Payment Gateway           | **Done** |
 | 7   | Digital Ticket & QR       | **Done** |
 | 8   | WhatsApp Integration      | **Done** |
-| 9   | Event-Day Check-in        | Next     |
-| 10  | Admin Dashboard           | Planned  |
+| 9   | Event-Day Check-in        | **Done** |
+| 10  | Admin Dashboard           | Next     |
 | 11  | Reports & Export          | Planned  |
 | 12  | Feedback & Certificates   | Planned  |
 | 13  | Security & Access Control | Planned  |

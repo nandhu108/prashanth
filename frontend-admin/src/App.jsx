@@ -9,6 +9,7 @@ import TicketTypes from './pages/TicketTypes';
 import PromoCodes from './pages/PromoCodes';
 import Registrations from './pages/Registrations';
 import Payments from './pages/Payments';
+import CheckIn from './pages/CheckIn';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -32,10 +33,7 @@ export default function App() {
           <Route path="/promo-codes" element={<Shielded><PromoCodes /></Shielded>} />
           <Route path="/registrations" element={<Shielded><Registrations /></Shielded>} />
           <Route path="/payments" element={<Shielded><Payments /></Shielded>} />
-          <Route
-            path="/checkin"
-            element={<Shielded><ComingSoon title="Event-day Check-in" module="Module 9" /></Shielded>}
-          />
+          <Route path="/checkin" element={<Shielded><CheckIn /></Shielded>} />
           <Route
             path="/feedback"
             element={<Shielded><ComingSoon title="Feedback" module="Module 12" /></Shielded>}

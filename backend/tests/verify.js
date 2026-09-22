@@ -17,6 +17,7 @@ const { hashPassword, comparePassword } = require('../src/utils/password');
 const { signAdminToken, verifyAdminToken } = require('../src/utils/jwt');
 const { generateQrPngBuffer } = require('../src/utils/qrcode');
 const { normalizePhone } = require('../src/services/whatsapp/client');
+const { extractToken } = require('../src/controllers/adminCheckinController');
 
 let pass = 0;
 let fail = 0;
@@ -431,6 +432,8 @@ const base = 'http://127.0.0.1:5099';
     ['POST', '/api/v1/admin/registrations/000000000000000000000000/cancel'],
     ['GET', '/api/v1/admin/payments'],
     ['POST', '/api/v1/admin/registrations/000000000000000000000000/resend-ticket'],
+    ['POST', '/api/v1/admin/checkin/scan'],
+    ['GET', '/api/v1/admin/checkin/stats'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -550,7 +553,24 @@ const base = 'http://127.0.0.1:5099';
     return '+91 98765 43210 -> 919876543210';
   });
 
-  console.log('\n=== 11. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 11. Check-in: QR payload token extraction ===');
+
+  check('extracts the token from a full ticket-page URL', () => {
+    assert(extractToken('https://events.example.com/tickets/abc123def456') === 'abc123def456');
+    return 'abc123def456';
+  });
+
+  check('passes a bare token through unchanged', () => {
+    assert(extractToken('abc123def456') === 'abc123def456');
+    return 'unchanged';
+  });
+
+  check('handles a trailing slash gracefully', () => {
+    assert(extractToken('https://events.example.com/tickets/abc123/') === 'abc123');
+    return 'abc123';
+  });
+
+  console.log('\n=== 12. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

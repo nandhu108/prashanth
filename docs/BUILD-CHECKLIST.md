@@ -179,11 +179,36 @@ Phone normalization (bare 10-digit → 91-prefixed, formatted numbers →
 digits-only) covered in `tests/verify.js` (78/78 passing). Test data cleaned
 up afterward.
 
-## Module 9 — Event-Day Check-in
+## Module 9 — Event-Day Check-in ✅
 
-- [ ] `POST /api/v1/admin/checkin/scan`, stats endpoint
-- [ ] `frontend-admin` Check-in scanner page (camera + manual)
-- [ ] Verified
+- [x] `POST /api/v1/admin/checkin/scan`, `GET /admin/checkin/stats`
+- [x] `frontend-admin` Check-in scanner page (camera + manual, `checkin_staff` role included)
+- [x] Verified
+
+Verified with a real registration end-to-end: first check-in shows a full-
+screen green "Checked in" state with live stats updating (1→2 across two
+test registrations); scanning the same code again correctly shows amber
+"Already checked in" with the original timestamp, not a duplicate success;
+an invalid code shows a clear red "Not valid" state. All three states and
+the stats tiles confirmed via screenshots.
+
+Found and fixed two real bugs during this verification, not caught by the
+DB-free suite:
+1. The debounce guard meant to stop the camera's continuous frame callback
+   from re-submitting the same code a dozen times a second was also
+   blocking **manual** submissions — a human deliberately clicking "Check
+   in" a second time did nothing. Split into `submitScan` (the raw call,
+   used by manual entry) and `handleCameraDetect` (debounced, camera-only).
+2. When `Html5Qrcode`'s constructor throws (no camera / element timing),
+   the UI got stuck forever on "Starting camera…" instead of falling back
+   to manual entry, because the throw happened outside the promise chain's
+   `.catch()`. Wrapped the constructor in try/catch to set `cameraStatus`
+   to `'unavailable'` on failure — re-verified showing the correct
+   "Camera not available … use manual entry below" message.
+
+`tests/verify.js` covers the QR-payload token extraction (URL → token,
+bare token, trailing slash) — 83/83 passing. Test data cleaned up
+afterward.
 
 ## Module 10 — Admin Dashboard
 
