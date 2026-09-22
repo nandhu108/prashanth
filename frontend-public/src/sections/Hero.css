@@ -1,0 +1,210 @@
+.hero {
+  position: relative;
+  background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%);
+  background-size: cover;
+  background-position: center;
+  color: var(--white);
+  padding-block: var(--space-20) var(--space-24);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Soft rose bloom echoing the brand's fertility/gynaecology accent. */
+.hero__glow {
+  position: absolute;
+  top: -180px;
+  right: -140px;
+  width: 620px;
+  height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(228, 133, 155, 0.36) 0%, rgba(228, 133, 155, 0) 68%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hero__inner {
+  position: relative;
+  max-width: 860px;
+}
+
+.hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.hero__title {
+  font-size: var(--text-6xl);
+  color: var(--white);
+  margin-bottom: var(--space-4);
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.hero__tagline {
+  font-size: var(--text-xl);
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 54ch;
+  margin-bottom: var(--space-8);
+}
+
+/* ---------- Key facts ---------- */
+
+.hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-10);
+  margin: 0 0 var(--space-8);
+}
+
+.hero__fact {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 340px;
+}
+
+.hero__fact dt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--white);
+}
+
+.hero__fact dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--text-base);
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.45;
+  padding-top: var(--space-1);
+}
+
+/* ---------- Countdown ---------- */
+
+.hero__countdown {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.hero__countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 74px;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+}
+
+.hero__countdown-value {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--white);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero__countdown-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: var(--space-2);
+  font-weight: 600;
+}
+
+/* ---------- Actions ---------- */
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+/* ---------- Highlights ---------- */
+
+.hero__highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+  list-style: none;
+  margin-bottom: var(--space-4);
+}
+
+.hero__highlights li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero__highlights svg {
+  color: var(--accent-300);
+  flex-shrink: 0;
+}
+
+.hero__deadline {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+}
+
+/* ---------- Bottom wave ---------- */
+
+.hero__wave {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  line-height: 0;
+  color: var(--white);
+}
+
+.hero__wave svg {
+  width: 100%;
+  height: 60px;
+  display: block;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .hero {
+    padding-block: var(--space-12) var(--space-20);
+  }
+  .hero__title {
+    max-width: 100%;
+  }
+  .hero__tagline {
+    font-size: var(--text-lg);
+  }
+  .hero__facts {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .hero__countdown-unit {
+    min-width: 66px;
+    padding: var(--space-3);
+  }
+  .hero__countdown-value {
+    font-size: var(--text-2xl);
+  }
+  .hero__actions .btn {
+    flex: 1 1 100%;
+  }
+}

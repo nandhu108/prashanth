@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment — never commit real credentials
+.env
+.env.local
+.env.production
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pm2.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Uploads (Module 2)
+uploads/
+public/uploads/

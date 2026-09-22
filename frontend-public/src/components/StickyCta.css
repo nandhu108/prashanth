@@ -1,0 +1,60 @@
+.sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--ink-200);
+  box-shadow: 0 -6px 24px rgba(15, 26, 36, 0.12);
+  transform: translateY(110%);
+  transition: transform var(--transition);
+}
+
+.sticky-cta.is-visible {
+  transform: translateY(0);
+}
+
+.sticky-cta__info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.sticky-cta__label {
+  font-size: var(--text-xs);
+  color: var(--ink-500);
+  font-weight: 500;
+}
+
+.sticky-cta__value {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--brand-800);
+}
+
+.sticky-cta__btn {
+  flex: 1;
+  max-width: 220px;
+}
+
+@media (max-width: 768px) {
+  .sticky-cta {
+    display: flex;
+  }
+  /* Keep the footer clear of the fixed bar. */
+  body {
+    padding-bottom: 0;
+  }
+  .site-footer {
+    padding-bottom: 76px;
+  }
+}

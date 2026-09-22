@@ -1,0 +1,207 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: box-shadow var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.site-header.is-scrolled {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom-color: var(--ink-200);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+/* ---------- Brand ---------- */
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--brand-700);
+  flex-shrink: 0;
+}
+
+.site-header__mark {
+  display: inline-flex;
+  color: var(--brand-700);
+}
+
+.site-header__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.site-header__brand-text strong {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--brand-800);
+  letter-spacing: -0.01em;
+}
+
+.site-header__brand-text span {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-weight: 600;
+}
+
+/* ---------- Desktop nav ---------- */
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.site-header__link {
+  position: relative;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-600);
+  border-radius: var(--radius-full);
+  transition: color var(--transition), background var(--transition);
+}
+
+.site-header__link:hover {
+  color: var(--brand-700);
+  background: var(--brand-50);
+}
+
+.site-header__link.is-active {
+  color: var(--brand-800);
+  background: var(--brand-100);
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* ---------- Mobile burger ---------- */
+
+.site-header__burger {
+  display: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--ink-200);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header__burger span,
+.site-header__burger span::before,
+.site-header__burger span::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--ink-800);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.site-header__burger span::before,
+.site-header__burger span::after {
+  content: '';
+  position: absolute;
+}
+
+.site-header__burger span::before {
+  transform: translateY(-6px);
+}
+
+.site-header__burger span::after {
+  transform: translateY(6px);
+}
+
+.site-header__burger span.is-open {
+  background: transparent;
+}
+
+.site-header__burger span.is-open::before {
+  transform: rotate(45deg);
+}
+
+.site-header__burger span.is-open::after {
+  transform: rotate(-45deg);
+}
+
+/* ---------- Mobile drawer ---------- */
+
+.site-header__scrim {
+  position: fixed;
+  inset: var(--header-height) 0 0;
+  background: rgba(15, 26, 36, 0.4);
+  z-index: 98;
+}
+
+.site-header__drawer {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: var(--white);
+  padding: var(--space-4) var(--container-pad) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-shadow: var(--shadow-lg);
+  border-bottom: 1px solid var(--ink-200);
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+}
+
+.site-header__drawer a {
+  padding: var(--space-4) var(--space-3);
+  font-weight: 600;
+  color: var(--ink-800);
+  border-bottom: 1px solid var(--ink-100);
+}
+
+.site-header__drawer a:last-of-type {
+  border-bottom: none;
+  margin-bottom: var(--space-3);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 960px) {
+  .site-header__nav {
+    display: none;
+  }
+  .site-header__burger {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-header__cta {
+    display: none; /* the sticky bottom CTA covers this on small screens */
+  }
+  .site-header__brand-text span {
+    display: none;
+  }
+}

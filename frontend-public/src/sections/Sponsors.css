@@ -1,0 +1,101 @@
+.sponsors__tier {
+  margin-bottom: var(--space-10);
+}
+
+.sponsors__tier:last-child {
+  margin-bottom: 0;
+}
+
+.sponsors__tier-label {
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: var(--space-5);
+}
+
+.sponsors__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.sponsors__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  min-height: 84px;
+  padding: var(--space-4) var(--space-6);
+  background: var(--white);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.sponsors__item:hover {
+  border-color: var(--brand-300);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.sponsors__item a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.sponsors__item img {
+  max-height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sponsors__name {
+  font-weight: 600;
+  color: var(--ink-700);
+  text-align: center;
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+/* Title sponsor gets visual prominence. */
+.sponsors__tier--title .sponsors__item {
+  min-width: 260px;
+  min-height: 110px;
+  border-color: var(--accent-300);
+  background: linear-gradient(180deg, var(--accent-50), var(--white));
+}
+
+.sponsors__tier--title .sponsors__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--accent-700);
+}
+
+.sponsors__tier--title .sponsors__item img {
+  max-height: 72px;
+}
+
+.sponsors__tier--partner .sponsors__item {
+  min-width: 150px;
+  min-height: 68px;
+}
+
+@media (max-width: 480px) {
+  .sponsors__item {
+    min-width: 140px;
+    min-height: 72px;
+    padding: var(--space-3) var(--space-4);
+  }
+  .sponsors__tier--title .sponsors__item {
+    min-width: 100%;
+  }
+}

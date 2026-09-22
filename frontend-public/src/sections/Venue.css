@@ -1,0 +1,78 @@
+.venue__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+.venue__name {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-4);
+}
+
+.venue__address {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  color: var(--ink-700);
+  line-height: 1.6;
+  margin-bottom: var(--space-5);
+}
+
+.venue__address svg {
+  color: var(--accent-600);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.venue__meta {
+  font-size: var(--text-sm);
+  color: var(--ink-600);
+  margin-bottom: var(--space-3);
+}
+
+.venue__meta strong {
+  color: var(--ink-800);
+}
+
+.venue__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-6);
+}
+
+.venue__map {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ink-200);
+  box-shadow: var(--shadow-sm);
+  background: var(--ink-100);
+  aspect-ratio: 16 / 10;
+}
+
+.venue__map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.venue__virtual {
+  text-align: center;
+}
+
+.venue__virtual-actions {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 860px) {
+  .venue__grid {
+    grid-template-columns: 1fr;
+  }
+  .venue__map {
+    aspect-ratio: 4 / 3;
+  }
+}

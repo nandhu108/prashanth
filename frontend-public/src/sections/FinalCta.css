@@ -1,0 +1,62 @@
+.final-cta {
+  position: relative;
+  background: linear-gradient(135deg, var(--brand-900), var(--brand-700));
+  color: var(--white);
+  padding-block: var(--space-20);
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.final-cta__glow {
+  position: absolute;
+  bottom: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 760px;
+  height: 460px;
+  background: radial-gradient(ellipse, rgba(228, 133, 155, 0.34) 0%, rgba(228, 133, 155, 0) 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.final-cta__inner {
+  max-width: 640px;
+}
+
+.final-cta__title {
+  font-size: var(--text-4xl);
+  color: var(--white);
+  margin-bottom: var(--space-4);
+}
+
+.final-cta__text {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: var(--space-8);
+}
+
+.final-cta__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.final-cta__scarcity {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-300);
+}
+
+@media (max-width: 640px) {
+  .final-cta__title {
+    font-size: var(--text-3xl);
+  }
+  .final-cta__text {
+    font-size: var(--text-base);
+  }
+  .final-cta__actions .btn {
+    width: 100%;
+  }
+}
