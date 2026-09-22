@@ -9,6 +9,8 @@ const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializeRegistrationForPublic } = require('../services/registrationSerializer');
 const { evaluatePromoCode } = require('../services/promo');
 const inventory = require('../services/inventory');
+const { sendTicketConfirmation } = require('../services/whatsapp/sendTicket');
+const logger = require('../utils/logger');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -110,6 +112,12 @@ const createRegistration = asyncHandler(async (req, res) => {
         { _id: promo._id, $expr: { $or: [{ $eq: ['$maxUses', 0] }, { $lt: ['$usedCount', '$maxUses'] }] } },
         { $inc: { usedCount: 1 } }
       );
+    }
+
+    try {
+      await sendTicketConfirmation({ event, ticketType, registration: reg });
+    } catch (err) {
+      logger.error(`WhatsApp confirmation failed for ${reg.registrationCode}`, err);
     }
 
     return sendSuccess(res, serializeRegistrationForPublic(reg), { status: 201 });

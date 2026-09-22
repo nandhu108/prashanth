@@ -160,12 +160,24 @@ layout bugs above were only visible by rendering the real output, which is
 why this module's verification leaned on that rather than the DB-free suite.
 Test data cleaned up afterward.
 
-## Module 8 — WhatsApp Integration
+## Module 8 — WhatsApp Integration ✅
 
-- [ ] Meta Cloud API client (dev-safe no-op without credentials)
-- [ ] Send ticket confirmation on payment/free-registration confirm
-- [ ] Admin manual resend endpoint
-- [ ] Verified (log-based, real send once keys supplied)
+- [x] Meta Cloud API client (dev-safe no-op without credentials)
+- [x] Send ticket confirmation on payment/free-registration confirm
+- [x] Admin manual resend endpoint + `frontend-admin` "Resend ticket" button
+- [x] Verified (log-based, real send once keys supplied)
+
+Verified: registering a free pass through the real API triggers the send
+path, which correctly no-ops with a clear log line
+(`[WhatsApp no-op] would message 9222222222: Hi WA Test! 🎉...`) and a one-
+time warning, without blocking or failing the registration response itself
+(wrapped in try/catch at both call sites — Module 3's free-confirm path and
+Module 6's paid-confirm path). The admin "Resend ticket" button surfaces the
+same "not configured" state as a clear, actionable message naming the exact
+env vars to set — same graceful-degradation pattern as Module 6's payments.
+Phone normalization (bare 10-digit → 91-prefixed, formatted numbers →
+digits-only) covered in `tests/verify.js` (78/78 passing). Test data cleaned
+up afterward.
 
 ## Module 9 — Event-Day Check-in
 

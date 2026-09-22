@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializeRegistrationForAdmin } = require('../services/registrationSerializer');
 const inventory = require('../services/inventory');
+const { sendTicketConfirmation } = require('../services/whatsapp/sendTicket');
 
 /** GET /api/v1/admin/registrations?event=&status=&q=&page=&limit= */
 const listRegistrations = asyncHandler(async (req, res) => {
@@ -80,4 +81,28 @@ const cancelRegistration = asyncHandler(async (req, res) => {
   return sendSuccess(res, serializeRegistrationForAdmin(reg));
 });
 
-module.exports = { listRegistrations, getRegistration, updateRegistration, cancelRegistration };
+/** POST /api/v1/admin/registrations/:id/resend-ticket */
+const resendTicket = asyncHandler(async (req, res) => {
+  const reg = await Registration.findById(req.params.id)
+    .populate('event', 'title')
+    .populate('ticketType', 'name');
+  if (!reg) throw ApiError.notFound('Registration not found');
+  if (reg.status !== 'confirmed' || !reg.qrToken) {
+    throw ApiError.conflict('Only confirmed registrations with an issued ticket can be resent.');
+  }
+
+  const result = await sendTicketConfirmation({ event: reg.event, ticketType: reg.ticketType, registration: reg });
+
+  if (!result.sent && result.reason === 'not_configured') {
+    throw ApiError.conflict(
+      'WhatsApp is not configured yet. Add WHATSAPP_PHONE_NUMBER_ID/ACCESS_TOKEN to backend/.env to enable sending.'
+    );
+  }
+  if (!result.sent) {
+    throw ApiError.conflict('WhatsApp send failed. Check the server logs for details.');
+  }
+
+  return sendSuccess(res, { sent: true }, { message: `Ticket resent to ${reg.attendee.phone}` });
+});
+
+module.exports = { listRegistrations, getRegistration, updateRegistration, cancelRegistration, resendTicket };

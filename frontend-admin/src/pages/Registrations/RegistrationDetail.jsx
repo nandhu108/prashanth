@@ -5,8 +5,11 @@ import Button from '../../components/ui/Button';
 
 export default function RegistrationDetail({ reg, onUpdated }) {
   const [cancelling, setCancelling] = useState(false);
+  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
   const canCancel = reg.status === 'pending_payment' || reg.status === 'confirmed';
+  const canResend = reg.status === 'confirmed' && reg.qrToken;
 
   async function handleCancel() {
     const reason = window.prompt('Reason for cancelling (optional):') || '';
@@ -20,6 +23,20 @@ export default function RegistrationDetail({ reg, onUpdated }) {
       setError(err.message);
     } finally {
       setCancelling(false);
+    }
+  }
+
+  async function handleResend() {
+    setResending(true);
+    setError('');
+    setResendMessage('');
+    try {
+      const res = await registrationApi.resendTicket(reg.id);
+      setResendMessage(res.message || 'Sent');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResending(false);
     }
   }
 
@@ -53,13 +70,21 @@ export default function RegistrationDetail({ reg, onUpdated }) {
         {reg.notes && <p style={{ margin: 0, color: 'var(--ink-500)', fontSize: 'var(--text-sm)' }}>{reg.notes}</p>}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: 'var(--space-3)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+          {canResend && (
+            <Button variant="secondary" size="sm" onClick={handleResend} disabled={resending}>
+              {resending ? 'Sending…' : 'Resend ticket (WhatsApp)'}
+            </Button>
+          )}
+          {canCancel && (
+            <Button variant="ghost" size="sm" onClick={handleCancel} disabled={cancelling}>
+              {cancelling ? 'Cancelling…' : 'Cancel registration'}
+            </Button>
+          )}
+        </div>
         {error && <span className="tab-save-bar__status tab-save-bar__status--error">{error}</span>}
-        {canCancel && (
-          <Button variant="ghost" size="sm" onClick={handleCancel} disabled={cancelling}>
-            {cancelling ? 'Cancelling…' : 'Cancel registration'}
-          </Button>
-        )}
+        {resendMessage && <span className="tab-save-bar__status tab-save-bar__status--success">{resendMessage}</span>}
       </div>
     </div>
   );

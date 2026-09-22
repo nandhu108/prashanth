@@ -16,6 +16,7 @@ const {
 const { hashPassword, comparePassword } = require('../src/utils/password');
 const { signAdminToken, verifyAdminToken } = require('../src/utils/jwt');
 const { generateQrPngBuffer } = require('../src/utils/qrcode');
+const { normalizePhone } = require('../src/services/whatsapp/client');
 
 let pass = 0;
 let fail = 0;
@@ -429,6 +430,7 @@ const base = 'http://127.0.0.1:5099';
     ['PATCH', '/api/v1/admin/registrations/000000000000000000000000'],
     ['POST', '/api/v1/admin/registrations/000000000000000000000000/cancel'],
     ['GET', '/api/v1/admin/payments'],
+    ['POST', '/api/v1/admin/registrations/000000000000000000000000/resend-ticket'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -536,7 +538,19 @@ const base = 'http://127.0.0.1:5099';
     assert(buf.length > 200, 'buffer suspiciously small: ' + buf.length);
   });
 
-  console.log('\n=== 10. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 10. WhatsApp phone normalization ===');
+
+  check('bare 10-digit Indian number gets a 91 country code', () => {
+    assert(normalizePhone('9876543210') === '919876543210', normalizePhone('9876543210'));
+    return '9876543210 -> 919876543210';
+  });
+
+  check('already-prefixed / formatted numbers pass through digit-only', () => {
+    assert(normalizePhone('+91 98765 43210') === '919876543210', normalizePhone('+91 98765 43210'));
+    return '+91 98765 43210 -> 919876543210';
+  });
+
+  console.log('\n=== 11. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

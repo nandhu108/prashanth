@@ -9,6 +9,7 @@ const { sendSuccess, asyncHandler } = require('../utils/response');
 const { getRazorpayClient, isConfigured } = require('../services/razorpay');
 const { serializeRegistrationForPublic } = require('../services/registrationSerializer');
 const inventory = require('../services/inventory');
+const { sendTicketConfirmation } = require('../services/whatsapp/sendTicket');
 const env = require('../config/env');
 const logger = require('../utils/logger');
 
@@ -85,6 +86,13 @@ async function finalizePaidRegistration(reg) {
       { _id: reg.promoCode, $expr: { $or: [{ $eq: ['$maxUses', 0] }, { $lt: ['$usedCount', '$maxUses'] }] } },
       { $inc: { usedCount: 1 } }
     );
+  }
+
+  try {
+    await reg.populate([{ path: 'event', select: 'title' }, { path: 'ticketType', select: 'name' }]);
+    await sendTicketConfirmation({ event: reg.event, ticketType: reg.ticketType, registration: reg });
+  } catch (err) {
+    logger.error(`WhatsApp confirmation failed for ${reg.registrationCode}`, err);
   }
 }
 
