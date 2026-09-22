@@ -5,6 +5,7 @@ import AppShell from './components/layout/AppShell';
 import Login from './pages/Login';
 import DashboardOverview from './pages/DashboardOverview';
 import EventEditor from './pages/EventEditor';
+import TicketTypes from './pages/TicketTypes';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -24,10 +25,7 @@ export default function App() {
 
           <Route path="/" element={<Shielded><DashboardOverview /></Shielded>} />
           <Route path="/event" element={<Shielded><EventEditor /></Shielded>} />
-          <Route
-            path="/ticket-types"
-            element={<Shielded><ComingSoon title="Ticket Types" module="Module 4" /></Shielded>}
-          />
+          <Route path="/ticket-types" element={<Shielded><TicketTypes /></Shielded>} />
           <Route
             path="/promo-codes"
             element={<Shielded><ComingSoon title="Promo Codes" module="Module 5" /></Shielded>}

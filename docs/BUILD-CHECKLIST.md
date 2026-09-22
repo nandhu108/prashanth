@@ -44,10 +44,17 @@ background-image to an `<img onError>` with a broken-state fallback.
 `checkin_staff` role is correctly excluded from all `/admin/events/*` routes
 (manager+ only). Re-seeded after testing to restore the original demo content.
 
-## Module 4 — Ticketing & Pass Types
-- [ ] Admin CRUD + reorder for TicketType
-- [ ] `frontend-admin` Ticket Types page (live inventory)
-- [ ] Verified
+## Module 4 — Ticketing & Pass Types ✅
+- [x] Admin CRUD for TicketType (create/update/delete, manager+ only)
+- [x] `frontend-admin` Ticket Types page (live sold/held/available inventory)
+- [x] Verified
+
+Verified: edited the Regular pass's price live against the real seeded event
+(118 sold / 0 held / 132 available correctly computed from real inventory
+fields), saved, confirmed via screenshot, re-seeded to restore. Delete is
+blocked server-side once `quantitySold > 0` (409 conflict) — deactivate
+instead of delete once a pass has sales. `tests/verify.js` extended with
+route-guard checks (52/52 passing). Zero console errors.
 
 ## Module 5 — Promo Code Management
 - [ ] PromoCode model + admin CRUD

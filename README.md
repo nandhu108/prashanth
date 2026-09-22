@@ -41,8 +41,8 @@ This repository is being delivered **module by module**. This is the state after
 | 1   | Premium Event Microsite   | **Done** |
 | 2   | Event CMS                 | **Done** |
 | 3   | Registration Management   | Planned  |
-| 4   | Ticketing & Pass Types    | Next     |
-| 5   | Promo Code Management     | Planned  |
+| 4   | Ticketing & Pass Types    | **Done** |
+| 5   | Promo Code Management     | Next     |
 | 6   | Payment Gateway           | Planned  |
 | 7   | Digital Ticket & QR       | Planned  |
 | 8   | WhatsApp Integration      | Planned  |

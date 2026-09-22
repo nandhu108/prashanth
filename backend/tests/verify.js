@@ -413,6 +413,10 @@ const base = 'http://127.0.0.1:5099';
     ['DELETE', '/api/v1/admin/events/000000000000000000000000'],
     ['PUT', '/api/v1/admin/events/000000000000000000000000/speakers'],
     ['POST', '/api/v1/admin/uploads'],
+    ['GET', '/api/v1/admin/ticket-types'],
+    ['POST', '/api/v1/admin/ticket-types'],
+    ['PATCH', '/api/v1/admin/ticket-types/000000000000000000000000'],
+    ['DELETE', '/api/v1/admin/ticket-types/000000000000000000000000'],
   ];
 
   for (const [method, path] of guardedRoutes) {

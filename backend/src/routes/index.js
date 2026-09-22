@@ -6,6 +6,7 @@ const publicEventRoutes = require('./publicEventRoutes');
 const adminAuthRoutes = require('./adminAuthRoutes');
 const adminEventRoutes = require('./adminEventRoutes');
 const adminUploadRoutes = require('./adminUploadRoutes');
+const adminTicketTypeRoutes = require('./adminTicketTypeRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -25,12 +26,12 @@ router.use('/public', publicEventRoutes);
 router.use('/admin/auth', adminAuthRoutes);
 router.use('/admin/events', adminEventRoutes);
 router.use('/admin/uploads', adminUploadRoutes);
+router.use('/admin/ticket-types', adminTicketTypeRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
  *   router.use('/registrations',       registrationRoutes);      // Module 3  - Registration (public)
  *   router.use('/admin/registrations', adminRegistrationRoutes); // Module 3  - Registration (admin)
- *   router.use('/admin/ticket-types',  adminTicketTypeRoutes);   // Module 4  - Ticketing
  *   router.use('/promo',               promoRoutes);             // Module 5  - Promo codes (public)
  *   router.use('/admin/promo',         adminPromoRoutes);        // Module 5  - Promo codes (admin)
  *   router.use('/payments',            paymentRoutes);           // Module 6  - Gateway
