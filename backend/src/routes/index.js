@@ -15,6 +15,8 @@ const publicPaymentRoutes = require('./publicPaymentRoutes');
 const adminPaymentRoutes = require('./adminPaymentRoutes');
 const publicTicketRoutes = require('./publicTicketRoutes');
 const adminCheckinRoutes = require('./adminCheckinRoutes');
+const adminReportRoutes = require('./adminReportRoutes');
+const adminUserRoutes = require('./adminUserRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -43,12 +45,12 @@ router.use('/payments', publicPaymentRoutes);
 router.use('/admin/payments', adminPaymentRoutes);
 router.use('/tickets', publicTicketRoutes);
 router.use('/admin/checkin', adminCheckinRoutes);
+router.use('/admin/reports', adminReportRoutes);
+router.use('/admin/users', adminUserRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
- *   router.use('/admin/reports',       reportRoutes);            // Module 11 - Reports
  *   router.use('/feedback',            feedbackRoutes);          // Module 12 - Feedback
- *   router.use('/admin/users',         adminUserRoutes);         // Module 13 - Security
  *   router.use('/admin/audit-log',     adminAuditLogRoutes);     // Module 13 - Security
  */
 

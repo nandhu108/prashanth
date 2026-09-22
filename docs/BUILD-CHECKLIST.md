@@ -210,12 +210,29 @@ DB-free suite:
 bare token, trailing slash) — 83/83 passing. Test data cleaned up
 afterward.
 
-## Module 10 — Admin Dashboard
+## Module 10 — Admin Dashboard ✅
 
-- [ ] Overview page (stat tiles + charts)
-- [ ] Users/role management (superadmin only)
-- [ ] Full nav shell polish across all admin pages
-- [ ] Verified + screenshots
+- [x] Overview page (real stat tiles + `recharts` bar chart, `GET /admin/reports/overview`)
+- [x] Users/role management (superadmin only, full CRUD + password reset)
+- [x] Full nav shell (all pages built through Module 9 are live, no more ComingSoon placeholders except Feedback/Audit Log/Help)
+- [x] Verified + screenshots
+
+Verified with real data: created 3 registrations, confirmed the dashboard's
+stat tiles (3 registrations, "Free" revenue, 0/3 checked in) and the
+"Registrations by pass" bar chart (built per the `dataviz` skill: single
+brand-hue bars since it's one measure split by category, not a multi-series
+palette; recessive grid, no axis lines, tooltip) all render real live data —
+screenshot confirms a correctly-scaled, correctly-labeled bar. Verified the
+Users page end-to-end: created a `checkin_staff` user through the UI, logged
+in as them, and confirmed **both** layers of the RBAC actually hold — the
+sidebar correctly hides "Users & roles"/"Audit log" for that role, **and**
+independently the server returns a real 403 on `GET /admin/events` for that
+role's token (checked directly via `fetch`, not just "the button isn't
+shown"). Self-protection confirmed: a superadmin cannot deactivate or delete
+their own account (both client button disabled and would 400 server-side).
+Test user, ticket type and registrations all cleaned up afterward.
+`tests/verify.js` route-guard coverage extended to `/admin/reports` and
+`/admin/users` (88/88 passing).
 
 ## Module 11 — Reports & Export
 

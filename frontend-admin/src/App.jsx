@@ -10,6 +10,7 @@ import PromoCodes from './pages/PromoCodes';
 import Registrations from './pages/Registrations';
 import Payments from './pages/Payments';
 import CheckIn from './pages/CheckIn';
+import Users from './pages/Users';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -44,11 +45,7 @@ export default function App() {
           />
           <Route
             path="/users"
-            element={
-              <Shielded roles={['superadmin']}>
-                <ComingSoon title="Users & Roles" module="Module 13" />
-              </Shielded>
-            }
+            element={<Shielded roles={['superadmin']}><Users /></Shielded>}
           />
           <Route
             path="/audit-log"

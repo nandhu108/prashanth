@@ -47,8 +47,8 @@ This repository is being delivered **module by module**. This is the state after
 | 7   | Digital Ticket & QR       | **Done** |
 | 8   | WhatsApp Integration      | **Done** |
 | 9   | Event-Day Check-in        | **Done** |
-| 10  | Admin Dashboard           | Next     |
-| 11  | Reports & Export          | Planned  |
+| 10  | Admin Dashboard           | **Done** |
+| 11  | Reports & Export          | Next     |
 | 12  | Feedback & Certificates   | Planned  |
 | 13  | Security & Access Control | Planned  |
 | 14  | Deployment & Go-Live      | Planned  |

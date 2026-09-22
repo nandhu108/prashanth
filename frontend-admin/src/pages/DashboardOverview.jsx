@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../lib/auth';
+import { eventApi } from '../lib/eventApi';
+import { reportApi } from '../lib/reportApi';
+import { formatCurrency } from '../lib/format';
+import { LoadingState } from '../components/ui/States';
 
 const QUICK_LINKS = [
   { to: '/event', label: 'Edit event content', desc: 'Hero, speakers, agenda, venue, sponsors' },
@@ -11,6 +16,8 @@ const QUICK_LINKS = [
 export default function DashboardOverview() {
   const { user } = useAuth();
   const [apiStatus, setApiStatus] = useState('checking');
+  const [eventId, setEventId] = useState(null);
+  const [overview, setOverview] = useState(null);
 
   useEffect(() => {
     fetch('/api/v1/health')
@@ -18,6 +25,21 @@ export default function DashboardOverview() {
       .then((body) => setApiStatus(body?.data?.database === 'connected' ? 'ok' : 'degraded'))
       .catch(() => setApiStatus('down'));
   }, []);
+
+  useEffect(() => {
+    eventApi
+      .list()
+      .then((res) => {
+        if (res.data.length > 0) setEventId(res.data[0].id);
+        else setOverview(false);
+      })
+      .catch(() => setOverview(false));
+  }, []);
+
+  useEffect(() => {
+    if (!eventId) return;
+    reportApi.overview(eventId).then((res) => setOverview(res.data)).catch(() => setOverview(false));
+  }, [eventId]);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -35,11 +57,63 @@ export default function DashboardOverview() {
       </div>
 
       <div className="stat-grid">
-        <StatTile label="Registrations" value="—" meta="Live in Module 3" />
-        <StatTile label="Revenue" value="—" meta="Live in Module 6" />
-        <StatTile label="Checked in" value="—" meta="Live in Module 9" />
+        <StatTile
+          label="Registrations"
+          value={overview ? overview.registrations.confirmed : '—'}
+          meta={overview ? `${overview.registrations.pending} pending payment` : 'Loading…'}
+        />
+        <StatTile
+          label="Revenue"
+          value={overview ? formatCurrency(overview.revenue) : '—'}
+          meta="Confirmed registrations"
+        />
+        <StatTile
+          label="Checked in"
+          value={overview ? `${overview.checkIn.checkedIn} / ${overview.checkIn.total}` : '—'}
+          meta={overview ? `${overview.checkIn.rate}% of confirmed` : 'Loading…'}
+        />
         <StatTile label="Avg. feedback" value="—" meta="Live in Module 12" />
       </div>
+
+      {overview === null && <LoadingState label="Loading overview…" />}
+
+      {overview && overview.byTicketType.length > 0 && (
+        <div className="card" style={{ marginBottom: 'var(--space-6)' }}>
+          <div className="card__header">
+            <h3 className="card__title">Registrations by pass</h3>
+          </div>
+          <div className="card__body">
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={overview.byTicketType} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--ink-100)" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: 'var(--ink-500)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--ink-200)' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fill: 'var(--ink-500)', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={32}
+                />
+                <Tooltip
+                  cursor={{ fill: 'var(--brand-50)' }}
+                  contentStyle={{
+                    border: '1px solid var(--ink-200)',
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                  formatter={(value, name) => [value, name === 'count' ? 'Registrations' : name]}
+                />
+                <Bar dataKey="count" fill="var(--brand-600)" radius={[4, 4, 0, 0]} maxBarSize={56} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="card__header">

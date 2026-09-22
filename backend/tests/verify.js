@@ -434,6 +434,11 @@ const base = 'http://127.0.0.1:5099';
     ['POST', '/api/v1/admin/registrations/000000000000000000000000/resend-ticket'],
     ['POST', '/api/v1/admin/checkin/scan'],
     ['GET', '/api/v1/admin/checkin/stats'],
+    ['GET', '/api/v1/admin/reports/overview'],
+    ['GET', '/api/v1/admin/users'],
+    ['POST', '/api/v1/admin/users'],
+    ['PATCH', '/api/v1/admin/users/000000000000000000000000'],
+    ['DELETE', '/api/v1/admin/users/000000000000000000000000'],
   ];
 
   for (const [method, path] of guardedRoutes) {
