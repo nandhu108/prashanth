@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node src/seed/seedEvent.js",
+    "seed:admin": "node src/seed/seedAdmin.js",
     "mock": "node src/dev/mockApi.js",
     "verify": "node tests/verify.js",
     "lint": "node --check src/server.js"
@@ -16,14 +17,20 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.6.0",
     "morgan": "^1.10.0",
+    "multer": "^2.4.0",
+    "pdfkit": "^0.20.2",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
     "slugify": "^1.6.6"
   },
   "devDependencies": {

@@ -11,6 +11,8 @@ const {
   serializeTicketTypeForPublic,
   serializeEventCard,
 } = require('../src/services/eventSerializer');
+const { hashPassword, comparePassword } = require('../src/utils/password');
+const { signAdminToken, verifyAdminToken } = require('../src/utils/jwt');
 
 let pass = 0;
 let fail = 0;
@@ -341,6 +343,64 @@ const base = 'http://127.0.0.1:5099';
   check('CORS rejects an unknown origin', () => {
     assert(!r.res.headers.get('access-control-allow-origin'), 'unknown origin was allowed');
     return 'blocked';
+  });
+
+  console.log('\n=== 5. Auth: passwords, JWT, RBAC guard ===');
+
+  await checkAsync('bcrypt hash round-trips and rejects wrong password', async () => {
+    const hash = await hashPassword('Correct-Horse-1');
+    assert(await comparePassword('Correct-Horse-1', hash) === true, 'valid password rejected');
+    assert(await comparePassword('wrong', hash) === false, 'wrong password accepted');
+  });
+
+  check('JWT sign/verify round-trips the user id and role', () => {
+    const token = signAdminToken({ _id: '507f1f77bcf86cd799439011', role: 'superadmin' });
+    const payload = verifyAdminToken(token);
+    assert(payload.sub === '507f1f77bcf86cd799439011', 'sub mismatch');
+    assert(payload.role === 'superadmin', 'role mismatch');
+    return 'sub+role preserved';
+  });
+
+  check('a tampered/garbage token fails verification', () => {
+    let threw = false;
+    try {
+      verifyAdminToken('not.a.real.token');
+    } catch {
+      threw = true;
+    }
+    assert(threw, 'garbage token was accepted');
+    return 'rejected';
+  });
+
+  r = await (async () => {
+    const res = await fetch(base + '/api/v1/admin/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    return { res, body: await res.json() };
+  })();
+  check('login without credentials -> 400, never touches the DB', () => {
+    assert(r.res.status === 400, 'status ' + r.res.status);
+    assert(r.body.success === false);
+    return r.body.error.message;
+  });
+
+  r = await get('/api/v1/admin/auth/me');
+  check('protected route without a token -> 401', () => {
+    assert(r.res.status === 401, 'status ' + r.res.status);
+    return r.body.error.message;
+  });
+
+  r = await (async () => {
+    const res = await fetch(base + '/api/v1/admin/auth/me', {
+      headers: { Authorization: 'Bearer garbage.token.here' },
+    });
+    return { res, body: await res.json() };
+  })();
+  check('protected route with an invalid token -> 401', () => {
+    assert(r.res.status === 401, 'status ' + r.res.status);
+    return r.body.error.message;
   });
 
   server.close();

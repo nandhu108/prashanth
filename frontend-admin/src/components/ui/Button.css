@@ -1,0 +1,132 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-weight: 600;
+  text-align: center;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+    border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.btn:hover:not(.is-disabled):not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(.is-disabled):not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn.is-disabled,
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ---------- Sizes ---------- */
+
+.btn--sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  min-height: 38px;
+}
+
+.btn--md {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  min-height: 46px;
+}
+
+.btn--lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-lg);
+  min-height: 56px;
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* ---------- Variants ---------- */
+
+.btn--primary {
+  background: var(--brand-700);
+  color: var(--white);
+  box-shadow: var(--shadow-brand);
+}
+
+.btn--primary:hover:not(.is-disabled):not(:disabled) {
+  background: var(--brand-800);
+  color: var(--white);
+}
+
+.btn--accent {
+  background: var(--accent-600);
+  color: var(--white);
+  box-shadow: 0 10px 30px rgba(210, 106, 132, 0.28);
+}
+
+.btn--accent:hover:not(.is-disabled):not(:disabled) {
+  background: var(--accent-700);
+  color: var(--white);
+}
+
+.btn--secondary {
+  background: var(--white);
+  color: var(--brand-700);
+  border-color: var(--brand-300);
+}
+
+.btn--secondary:hover:not(.is-disabled):not(:disabled) {
+  background: var(--brand-50);
+  border-color: var(--brand-500);
+  color: var(--brand-800);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink-700);
+}
+
+.btn--ghost:hover:not(.is-disabled):not(:disabled) {
+  background: var(--ink-100);
+  color: var(--ink-900);
+}
+
+/* For use on dark hero backgrounds. */
+.btn--outline-light {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.btn--outline-light:hover:not(.is-disabled):not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: var(--white);
+  color: var(--white);
+}
+
+.btn--whatsapp {
+  background: #25d366;
+  color: #04301a;
+}
+
+.btn--whatsapp:hover:not(.is-disabled):not(:disabled) {
+  background: #1eb955;
+  color: #04301a;
+}
+
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.1em;
+}

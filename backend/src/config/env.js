@@ -46,11 +46,35 @@ const env = {
   corsOrigins: readList('CORS_ORIGINS', [
     'http://localhost:5173',
     'http://localhost:4173',
+    'http://localhost:8082',
   ]),
   rateLimit: {
     windowMs: readInt('RATE_LIMIT_WINDOW_MINUTES', 15) * 60 * 1000,
     max: readInt('RATE_LIMIT_MAX', 300),
   },
+
+  // --- Auth (Foundation) ---
+  jwtSecret: read('JWT_SECRET', 'dev-only-insecure-secret-change-me', { required: true }),
+  jwtExpiresIn: read('JWT_EXPIRES_IN', '7d'),
+  adminBootstrapEmail: read('ADMIN_BOOTSTRAP_EMAIL', 'admin@prashanthhospitals.com'),
+  adminBootstrapPassword: read('ADMIN_BOOTSTRAP_PASSWORD', 'ChangeMe123!'),
+  adminBootstrapName: read('ADMIN_BOOTSTRAP_NAME', 'Platform Admin'),
+
+  // --- Uploads (Module 2) ---
+  uploadDir: read('UPLOAD_DIR', 'uploads'),
+
+  // --- Ticketing / holds (Module 3-4) ---
+  ticketHoldMinutes: readInt('TICKET_HOLD_MINUTES', 15),
+
+  // --- Payments (Module 6) ---
+  razorpayKeyId: read('RAZORPAY_KEY_ID', ''),
+  razorpayKeySecret: read('RAZORPAY_KEY_SECRET', ''),
+  razorpayWebhookSecret: read('RAZORPAY_WEBHOOK_SECRET', ''),
+
+  // --- WhatsApp (Module 8) ---
+  whatsappPhoneNumberId: read('WHATSAPP_PHONE_NUMBER_ID', ''),
+  whatsappAccessToken: read('WHATSAPP_ACCESS_TOKEN', ''),
+  whatsappApiVersion: read('WHATSAPP_API_VERSION', 'v20.0'),
 };
 
 env.isProduction = env.nodeEnv === 'production';

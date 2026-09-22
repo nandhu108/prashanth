@@ -6,13 +6,21 @@ Playwright screenshots for UI-heavy modules). See
 `README.md` for the module summary table and `docs/API.md` for the endpoint
 reference as it grows.
 
-## Foundation — Auth & RBAC
-- [ ] `User` model + `bcryptjs`/`jsonwebtoken` utils + `requireAuth`/`requireRole` middleware
-- [ ] `POST /api/v1/admin/auth/login` (rate-limited + lockout), `GET /api/v1/admin/auth/me`
-- [ ] `seed/seedAdmin.js` idempotent superadmin bootstrap
-- [ ] `frontend-admin/` app scaffold (Vite, Router, AuthContext, ProtectedRoute, shell layout, Login page)
-- [ ] `frontend-admin` Dockerfile + nginx conf; `admin` service added to docker-compose.yml
-- [ ] `tests/verify.js` §Auth
+## Foundation — Auth & RBAC ✅
+- [x] `User` model + `bcryptjs`/`jsonwebtoken` utils + `requireAuth`/`requireRole` middleware
+- [x] `POST /api/v1/admin/auth/login` (rate-limited + lockout), `GET /api/v1/admin/auth/me`
+- [x] `seed/seedAdmin.js` idempotent superadmin bootstrap
+- [x] `frontend-admin/` app scaffold (Vite, Router, AuthContext, ProtectedRoute, shell layout, Login page)
+- [x] `frontend-admin` Dockerfile + nginx conf; `admin` service added to docker-compose.yml
+- [x] `tests/verify.js` §Auth (41/41 passing)
+
+Verified: full stack up via `docker compose up --build -d` (mongo/api/web/admin all
+healthy), `npm run seed:admin` bootstraps superadmin, login → `/me` round-trips a
+JWT end-to-end through NGINX on port 8082, wrong password / missing token / bad
+token all correctly rejected. Playwright screenshots (desktop + mobile, incl. the
+mobile nav drawer) confirm the premium split-screen login and sidebar shell with
+zero console errors. Role-gated nav items (`Users & roles`, `Audit log`) only
+render for `superadmin`.
 
 ## Module 2 — Event CMS
 - [ ] Admin CRUD for Event (details, venue, theme, seo, organizer, contact)
