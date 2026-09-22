@@ -15,6 +15,7 @@ const {
 } = require('../src/services/eventSerializer');
 const { hashPassword, comparePassword } = require('../src/utils/password');
 const { signAdminToken, verifyAdminToken } = require('../src/utils/jwt');
+const { generateQrPngBuffer } = require('../src/utils/qrcode');
 
 let pass = 0;
 let fail = 0;
@@ -525,7 +526,17 @@ const base = 'http://127.0.0.1:5099';
     return 'sha256 hex, 64 chars';
   });
 
-  console.log('\n=== 9. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 9. QR ticket generation ===');
+
+  await checkAsync('generateQrPngBuffer produces a real PNG', async () => {
+    const buf = await generateQrPngBuffer('https://example.com/tickets/abc123');
+    assert(Buffer.isBuffer(buf), 'not a buffer');
+    // PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
+    assert(buf.slice(0, 4).toString('hex') === '89504e47', 'missing PNG signature');
+    assert(buf.length > 200, 'buffer suspiciously small: ' + buf.length);
+  });
+
+  console.log('\n=== 10. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

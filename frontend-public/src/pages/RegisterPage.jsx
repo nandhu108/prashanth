@@ -142,12 +142,17 @@ export default function RegisterPage() {
             {result.status === 'confirmed' ? (
               <>
                 <p className="register-success__note">
-                  A confirmation with your digital ticket will be sent to <strong>{result.attendee.email}</strong>{' '}
-                  and on WhatsApp shortly.
+                  A confirmation with your digital ticket will also be sent to{' '}
+                  <strong>{result.attendee.email}</strong> and on WhatsApp shortly.
                 </p>
-                <Button variant="primary" href={`/events/${slug}`}>
-                  Back to event
+                <Button variant="primary" href={`/tickets/${result.qrToken}`}>
+                  View your ticket
                 </Button>
+                <div style={{ marginTop: 16 }}>
+                  <Button variant="secondary" href={`/events/${slug}`}>
+                    Back to event
+                  </Button>
+                </div>
               </>
             ) : (
               <PendingPaymentPanel registration={result} onConfirmed={setResult} eventSlug={slug} />

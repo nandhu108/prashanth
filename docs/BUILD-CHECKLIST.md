@@ -132,12 +132,33 @@ covers the dev-safe-when-unconfigured paths and the HMAC formula itself
 (74/74 passing) — the DB-free suite alone would NOT have caught the masking
 bug above, which is why the real production-mode Docker pass mattered here.
 
-## Module 7 — Digital Ticket & QR
+## Module 7 — Digital Ticket & QR ✅
 
-- [ ] QR token generation, `utils/ticketPdf.js` (pdfkit)
-- [ ] `GET /api/v1/tickets/:qrToken` + `/pdf`
-- [ ] `frontend-public` Ticket page
-- [ ] Verified
+- [x] QR token generation (`utils/qrcode.js`), branded PDF ticket (`utils/ticketPdf.js`, pdfkit)
+- [x] `GET /api/v1/tickets/:qrToken`, `/qr.png`, `/pdf`
+- [x] `frontend-public` Ticket page (`/tickets/:qrToken`)
+- [x] Verified
+
+Verified end-to-end: created a temp free pass, registered through the real
+UI, followed "View your ticket" to `/tickets/:qrToken`, confirmed the QR
+image renders (real `<img>` hitting `/api/v1/tickets/:qrToken/qr.png`) and
+downloaded the PDF (`file` confirms: valid PDF 1.3, 1 page). The QR encodes
+`{PUBLIC_SITE_URL}/tickets/:qrToken` so any camera opens the ticket page, and
+Module 9's admin scanner will extract the token from that same URL.
+
+Caught and fixed two real layout bugs by actually reading the rendered PDF
+(not just checking it parsed): the header text ("PRASHANTH HOSPITALS" /
+"DIGITAL TICKET") overlapped because the two lines were spaced for a
+single-line brand name that actually wrapped to two, and the event title
+broke mid-word ("Gy" / "naecology") because the left band was too narrow for
+an 18pt title. Fixed by measuring actual wrapped height with
+`doc.heightOfString()` before placing the title, widening the band, and
+right-sizing the font for longer titles. Re-verified with a fresh PDF —
+clean two-line brand header, title wraps at word boundaries only.
+`tests/verify.js` covers the QR PNG generation (magic-byte check) — the
+layout bugs above were only visible by rendering the real output, which is
+why this module's verification leaned on that rather than the DB-free suite.
+Test data cleaned up afterward.
 
 ## Module 8 — WhatsApp Integration
 

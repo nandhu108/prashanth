@@ -1,0 +1,63 @@
+'use strict';
+
+const Registration = require('../models/Registration');
+const ApiError = require('../utils/ApiError');
+const { sendSuccess, asyncHandler } = require('../utils/response');
+const { generateQrPngBuffer } = require('../utils/qrcode');
+const { streamTicketPdf } = require('../utils/ticketPdf');
+const env = require('../config/env');
+
+/**
+ * The qrToken is unguessable (48 hex chars of crypto randomness) and IS the
+ * access control for all three routes below — no further auth. Only
+ * confirmed registrations ever have one (see Registration.issueQrToken()).
+ */
+async function findTicketOr404(qrToken) {
+  const reg = await Registration.findOne({ qrToken })
+    .populate('event', 'title startDate endDate venue mode timezone')
+    .populate('ticketType', 'name admitsCount');
+  if (!reg) throw ApiError.notFound('Ticket not found');
+  return reg;
+}
+
+function checkInUrlFor(qrToken) {
+  return `${env.publicSiteUrl}/tickets/${qrToken}`;
+}
+
+/** GET /api/v1/tickets/:qrToken */
+const getTicket = asyncHandler(async (req, res) => {
+  const reg = await findTicketOr404(req.params.qrToken);
+  return sendSuccess(res, {
+    registrationCode: reg.registrationCode,
+    status: reg.status,
+    attendee: reg.attendee,
+    checkedInAt: reg.checkedInAt,
+    certificateIssuedAt: reg.certificateIssuedAt,
+    event: reg.event,
+    ticketType: reg.ticketType,
+  });
+});
+
+/** GET /api/v1/tickets/:qrToken/qr.png */
+const getTicketQrImage = asyncHandler(async (req, res) => {
+  const reg = await findTicketOr404(req.params.qrToken);
+  const buffer = await generateQrPngBuffer(checkInUrlFor(reg.qrToken));
+  res.set('Content-Type', 'image/png');
+  res.set('Cache-Control', 'private, max-age=3600');
+  res.send(buffer);
+});
+
+/** GET /api/v1/tickets/:qrToken/pdf */
+const getTicketPdf = asyncHandler(async (req, res) => {
+  const reg = await findTicketOr404(req.params.qrToken);
+  res.set('Content-Type', 'application/pdf');
+  res.set('Content-Disposition', `inline; filename="${reg.registrationCode}.pdf"`);
+  await streamTicketPdf(res, {
+    event: reg.event,
+    ticketType: reg.ticketType,
+    registration: reg,
+    checkInUrl: checkInUrlFor(reg.qrToken),
+  });
+});
+
+module.exports = { getTicket, getTicketQrImage, getTicketPdf };

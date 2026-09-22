@@ -13,6 +13,7 @@ const publicRegistrationRoutes = require('./publicRegistrationRoutes');
 const adminRegistrationRoutes = require('./adminRegistrationRoutes');
 const publicPaymentRoutes = require('./publicPaymentRoutes');
 const adminPaymentRoutes = require('./adminPaymentRoutes');
+const publicTicketRoutes = require('./publicTicketRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -39,10 +40,10 @@ router.use('/registrations', publicRegistrationRoutes);
 router.use('/admin/registrations', adminRegistrationRoutes);
 router.use('/payments', publicPaymentRoutes);
 router.use('/admin/payments', adminPaymentRoutes);
+router.use('/tickets', publicTicketRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
- *   router.use('/tickets',             ticketRoutes);            // Module 7  - Digital ticket & QR
  *   router.use('/admin/checkin',       checkinRoutes);           // Module 9  - Event-day
  *   router.use('/admin/reports',       reportRoutes);            // Module 11 - Reports
  *   router.use('/feedback',            feedbackRoutes);          // Module 12 - Feedback

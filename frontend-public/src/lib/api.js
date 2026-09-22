@@ -61,4 +61,5 @@ export const api = {
     request('/payments/orders', { method: 'POST', body: JSON.stringify({ registrationId }), ...opts }),
   verifyPayment: (payload, opts) =>
     request('/payments/verify', { method: 'POST', body: JSON.stringify(payload), ...opts }),
+  getTicket: (qrToken, opts) => request(`/tickets/${encodeURIComponent(qrToken)}`, opts),
 };
