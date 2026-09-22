@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const Event = require('../src/models/Event');
 const TicketType = require('../src/models/TicketType');
 const PromoCode = require('../src/models/PromoCode');
+const Registration = require('../src/models/Registration');
 const {
   serializeEventForPublic,
   serializeTicketTypeForPublic,
@@ -422,6 +423,10 @@ const base = 'http://127.0.0.1:5099';
     ['POST', '/api/v1/admin/promo'],
     ['PATCH', '/api/v1/admin/promo/000000000000000000000000'],
     ['DELETE', '/api/v1/admin/promo/000000000000000000000000'],
+    ['GET', '/api/v1/admin/registrations'],
+    ['GET', '/api/v1/admin/registrations/000000000000000000000000'],
+    ['PATCH', '/api/v1/admin/registrations/000000000000000000000000'],
+    ['POST', '/api/v1/admin/registrations/000000000000000000000000/cancel'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -436,7 +441,36 @@ const base = 'http://127.0.0.1:5099';
     });
   }
 
-  console.log('\n=== 7. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 7. Registration model: codes, tokens, pricing ===');
+
+  await checkAsync('auto-generates a unique registrationCode on validate', async () => {
+    const reg = new Registration({
+      event: new mongoose.Types.ObjectId(),
+      ticketType: new mongoose.Types.ObjectId(),
+      attendee: { name: 'Dr. Test', email: 'test@example.com', phone: '9999999999' },
+      pricing: { basePrice: 2500, totalAmount: 2500 },
+    });
+    await reg.validate();
+    assert(/^REG-[0-9A-F]{8}$/.test(reg.registrationCode), 'got ' + reg.registrationCode);
+    return reg.registrationCode;
+  });
+
+  check('isFree virtual reflects totalAmount', () => {
+    const free = new Registration({ pricing: { basePrice: 0, totalAmount: 0 } });
+    const paid = new Registration({ pricing: { basePrice: 2500, totalAmount: 2950 } });
+    assert(free.isFree === true && paid.isFree === false, 'isFree mismatch');
+    return 'free=true, paid=false';
+  });
+
+  check('issueQrToken sets a 48-char hex token', () => {
+    const reg = new Registration();
+    const token = reg.issueQrToken();
+    assert(/^[0-9a-f]{48}$/.test(token), 'got ' + token);
+    assert(reg.qrToken === token);
+    return 'issued';
+  });
+
+  console.log('\n=== 8. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

@@ -75,14 +75,36 @@ max-uses, unlimited-use codes, validTo/validFrom ordering) all covered in
 `tests/verify.js` without needing a DB (62/62 passing). Test code cleaned
 up afterward.
 
-## Module 3 — Registration Management
+## Module 3 — Registration Management ✅
 
-- [ ] Inventory hold/release service (`services/inventory.js`)
-- [ ] Public `POST /api/v1/registrations`
-- [ ] Admin registration list/search/filter/detail/cancel/resend
-- [ ] `frontend-public` real registration form (replaces placeholder route)
-- [ ] `frontend-admin` Registrations page
-- [ ] Verified
+- [x] Inventory hold/release service (`services/inventory.js`)
+- [x] Public `POST /api/v1/registrations`
+- [x] Admin registration list/search/filter/detail/cancel (resend arrives in Module 8 with WhatsApp)
+- [x] `frontend-public` real registration form (replaces placeholder route)
+- [x] `frontend-admin` Registrations page
+- [x] Verified
+
+Verified end-to-end through the real Docker stack, not just curl:
+- **Paid path (UI):** selected "Delegate — Regular" on the live microsite, filled
+  the form, submitted — got a "Registration received" holding state with a real
+  registration code, ₹2,950 total (2500 + 18% GST) computed correctly.
+  Confirmed server-side the pass's `quantityHeld` went 0→1 (a true atomic hold,
+  `Event.registeredCount` deliberately untouched until payment confirms).
+- **Free path (API):** created a temp free pass, registered against it —
+  confirmed immediately, 48-hex `qrToken` issued, `quantitySold` and
+  `Event.registeredCount` both incremented atomically.
+- **Cancel + compensation:** cancelled the paid (held) registration from the
+  admin UI — hold released back to 0, status flipped to "cancelled" with the
+  reason note, all reflected live with no page reload. Cancelled the free
+  (confirmed) registration via the API — `quantitySold` and
+  `registeredCount` both correctly decremented back.
+- Sold-out and closed-registration paths return a clear 409 with the specific
+  reason (`sold-out`, `closed`, `not-yet-open`, etc.) rather than a generic error.
+- `tests/verify.js` covers the DB-free parts (registrationCode generation,
+  `isFree` virtual, QR token format) — 69/69 passing. The inventory/capacity
+  logic itself was verified against the live database above rather than in
+  the DB-free suite, since it's inherently about atomic Mongo updates.
+- Test data cleaned up afterward.
 
 ## Module 6 — Payment Gateway
 
