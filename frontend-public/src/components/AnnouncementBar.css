@@ -1,11 +1,11 @@
 .announcement {
-  background: var(--brand-800);
+  background: var(--ink-900);
   color: var(--white);
   font-size: var(--text-sm);
 }
 
 .announcement--warning {
-  background: var(--accent-700);
+  background: var(--warning-700);
 }
 
 .announcement--success {

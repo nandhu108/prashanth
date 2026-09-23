@@ -1,6 +1,6 @@
 .hero {
   position: relative;
-  background: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 55%, var(--brand-600) 100%);
+  background: var(--ink-900);
   background-size: cover;
   background-position: center;
   color: var(--white);
@@ -9,15 +9,15 @@
   isolation: isolate;
 }
 
-/* Soft rose bloom echoing the brand's fertility/gynaecology accent. */
+/* Soft indigo bloom — restrained, the one accent showing through the dark gradient. */
 .hero__glow {
   position: absolute;
-  top: -180px;
-  right: -140px;
-  width: 620px;
-  height: 620px;
+  top: -260px;
+  right: -180px;
+  width: 820px;
+  height: 820px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(228, 133, 155, 0.36) 0%, rgba(228, 133, 155, 0) 68%);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.34) 0%, rgba(99, 102, 241, 0) 66%);
   pointer-events: none;
   z-index: -1;
 }

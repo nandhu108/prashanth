@@ -128,8 +128,8 @@ const SeoSchema = new Schema(
 
 const ThemeSchema = new Schema(
   {
-    primaryColor: { type: String, trim: true, default: '#0E5C8A' },
-    accentColor: { type: String, trim: true, default: '#E4859B' },
+    primaryColor: { type: String, trim: true, default: '#4F46E5' },
+    accentColor: { type: String, trim: true, default: '#4F46E5' },
     heroImageUrl: { type: String, trim: true, default: '' },
     logoUrl: { type: String, trim: true, default: '' },
   },

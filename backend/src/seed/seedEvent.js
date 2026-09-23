@@ -324,7 +324,7 @@ const eventData = {
   announcements: [
     {
       message: 'Early bird pricing closes in 7 days — register now to save ₹500 on delegate passes.',
-      level: 'warning',
+      level: 'info',
       isActive: true,
       publishedAt: new Date(),
       expiresAt: daysFromNow(7, 23, 59),

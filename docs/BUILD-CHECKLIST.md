@@ -379,3 +379,19 @@ All test data (2 registrations, 1 temp ticket type, 2 feedback entries)
 cleaned up afterward — confirmed via API: 0 confirmed registrations, 5
 ticket types (the original seed set), 0 feedback entries. Final
 `backend/tests/verify.js` run: **98/98 passing.**
+
+## UI refresh — Modern SaaS minimal ✅
+
+Both apps (`frontend-public`, `frontend-admin`) restyled in the Linear/Stripe/Vercel
+direction: Inter-only typography, near-monochrome ink palette with a single indigo
+accent (`#4F46E5`), near-black primary buttons, hairline borders, tighter radii,
+restrained shadows and motion, near-black hero / admin sidebar with a soft indigo
+glow. Done by remapping the design tokens (variable names unchanged) plus targeted
+component tweaks, so no page logic changed.
+
+- [x] Tokens, fonts, headings, buttons, badges-adjacent surfaces in both apps
+- [x] Public: hero, announcement bar (info = ink, warning = amber), tickets, speakers, agenda, CTA
+- [x] Admin: sidebar shell, login, forms, cards, stat tiles, tables
+- [x] Event theme defaults (`#4F46E5`) in `Event.js` + CMS Theme tab; Razorpay checkout theme
+- [x] Rebuilt in Docker; Playwright desktop + mobile screenshots of both apps, 0 console errors
+- [x] `backend/tests/verify.js` still **98/98**

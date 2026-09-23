@@ -5,8 +5,8 @@ import ImageUploadField from '../../components/ImageUploadField';
 
 export default function ThemeSeoTab({ event, onSaved }) {
   const [theme, setTheme] = useState({
-    primaryColor: '#0E5C8A',
-    accentColor: '#E4859B',
+    primaryColor: '#4F46E5',
+    accentColor: '#4F46E5',
     heroImageUrl: '',
     logoUrl: '',
     ...event.theme,

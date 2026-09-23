@@ -71,7 +71,7 @@
   min-width: 260px;
   min-height: 110px;
   border-color: var(--accent-300);
-  background: linear-gradient(180deg, var(--accent-50), var(--white));
+  background: var(--white);
 }
 
 .sponsors__tier--title .sponsors__name {

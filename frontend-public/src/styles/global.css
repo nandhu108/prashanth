@@ -32,10 +32,10 @@ h3,
 h4 {
   font-family: var(--font-display);
   color: var(--ink-900);
-  line-height: 1.18;
+  line-height: 1.15;
   margin: 0 0 var(--space-4);
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-weight: 650;
+  letter-spacing: -0.025em;
 }
 
 p {
@@ -98,7 +98,7 @@ button {
 }
 
 .section--brand-soft {
-  background: linear-gradient(180deg, var(--brand-50) 0%, var(--white) 100%);
+  background: linear-gradient(180deg, var(--ink-50) 0%, var(--white) 100%);
 }
 
 @media (max-width: 768px) {

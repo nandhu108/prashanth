@@ -26,10 +26,10 @@
 }
 
 .agenda__tab.is-active {
-  background: var(--brand-700);
-  border-color: var(--brand-700);
+  background: var(--ink-900);
+  border-color: var(--ink-900);
   color: var(--white);
-  box-shadow: var(--shadow-brand);
+  box-shadow: var(--shadow-sm);
 }
 
 .agenda__tab-day {
@@ -164,7 +164,7 @@
 
 .agenda-item--accent .agenda-item__content {
   border-color: var(--accent-300);
-  background: linear-gradient(180deg, var(--accent-50), var(--white));
+  background: var(--accent-50);
 }
 
 .agenda-item__heading {
@@ -210,7 +210,7 @@
 
 .agenda-tag--teal {
   background: var(--teal-100);
-  color: #0a6a6a;
+  color: var(--teal-600);
 }
 
 .agenda-item__desc {

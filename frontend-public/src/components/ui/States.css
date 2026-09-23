@@ -1,7 +1,7 @@
 /* ---------- Skeleton loading ---------- */
 
 .skeleton-hero {
-  background: linear-gradient(135deg, var(--brand-900), var(--brand-700));
+  background: var(--ink-900);
   padding-block: var(--space-20);
 }
 
