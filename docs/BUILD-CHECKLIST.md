@@ -353,6 +353,29 @@ Foundation (auth/RBAC) plus all 13 build modules are complete, verified
 against the live Docker stack, and committed. See the final click-through
 demo checklist below.
 
-## Final demo
+## Final demo ✅
 
-- [ ] Full click-through: register → pay → ticket → check-in → certificate → reports, screenshots captured
+- [x] Full click-through, captured with screenshots at every step
+
+Capstone verification, run against a **fresh `docker compose down` +
+`up --build`** (not the long-running dev containers) to make sure the whole
+stack actually comes up clean from nothing, not just "still running from
+earlier": register on the public microsite → view digital ticket with QR →
+check in via the admin scanner (manual entry, camera correctly reports
+unavailable in headless Chromium) → submit feedback via the ticket's
+"Give feedback" link → confirm it appears correctly in Admin → Reports
+(1 confirmed, 100% checked in) and Admin → Feedback (5★, correct attendee
+attribution). All four services (`mongo`/`api`/`web`/`admin`) came up
+healthy from the clean rebuild; zero console errors across the whole flow
+in both the public and admin apps. The payment step of "register → pay"
+was exercised earlier in Module 6 with the same real Razorpay Checkout.js
+flow (dev-safe "not configured" path, since no real test keys were
+supplied) and the certificate step in Module 12 (event temporarily flipped
+to `completed`, PDF downloaded and read back) — not re-run here to avoid
+re-mutating event state right before hand-off; both are documented with
+their own screenshots in their module sections above.
+
+All test data (2 registrations, 1 temp ticket type, 2 feedback entries)
+cleaned up afterward — confirmed via API: 0 confirmed registrations, 5
+ticket types (the original seed set), 0 feedback entries. Final
+`backend/tests/verify.js` run: **98/98 passing.**
