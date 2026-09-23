@@ -2,7 +2,7 @@
 
 const app = require('./app');
 const env = require('./config/env');
-const { connectDatabase } = require('./config/database');
+const { connectDatabase, ensureIndexes } = require('./config/database');
 const logger = require('./utils/logger');
 
 let server;
@@ -10,6 +10,7 @@ let server;
 async function start() {
   try {
     await connectDatabase();
+    await ensureIndexes();
 
     server = app.listen(env.port, () => {
       logger.info(`API listening on port ${env.port} [${env.nodeEnv}]`);

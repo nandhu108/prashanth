@@ -41,10 +41,28 @@ async function connectDatabase(uri = env.mongoUri) {
   return connectionPromise;
 }
 
+/**
+ * autoIndex is off in production, so nothing else builds the schema indexes.
+ * Without this, every `unique: true` (user email, promo code, qrToken,
+ * feedback per registration, event slug) is silently unenforced.
+ * createIndexes() is idempotent and non-destructive.
+ */
+async function ensureIndexes() {
+  const results = await Promise.allSettled(
+    Object.values(mongoose.models).map((model) => model.createIndexes())
+  );
+  results.forEach((result, i) => {
+    if (result.status === 'rejected') {
+      const name = Object.keys(mongoose.models)[i];
+      logger.error(`Index build failed for ${name} (existing duplicate data?)`, result.reason);
+    }
+  });
+}
+
 async function disconnectDatabase() {
   connectionPromise = null;
   await mongoose.connection.close();
   logger.info('MongoDB connection closed');
 }
 
-module.exports = { connectDatabase, disconnectDatabase };
+module.exports = { connectDatabase, disconnectDatabase, ensureIndexes };
