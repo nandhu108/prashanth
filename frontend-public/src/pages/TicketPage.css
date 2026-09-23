@@ -85,4 +85,7 @@
 
 .ticket-card__actions {
   margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }

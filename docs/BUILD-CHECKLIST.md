@@ -260,12 +260,26 @@ Fixed by detecting `overview.revenue === 0` and showing an honest
 empty state instead of a bar chart with a fabricated scale. Re-verified with
 a fresh screenshot. Test data cleaned up afterward.
 
-## Module 12 — Feedback & Certificates
+## Module 12 — Feedback & Certificates ✅
 
-- [ ] Feedback model + public submit endpoint
-- [ ] On-the-fly certificate PDF (`/tickets/:qrToken/certificate.pdf`)
-- [ ] `frontend-public` Feedback page; `frontend-admin` Feedback page
-- [ ] Verified
+- [x] Feedback model + public submit endpoint (`POST /feedback`, qrToken-gated, one per registration)
+- [x] On-the-fly certificate PDF (`GET /tickets/:qrToken/certificate.pdf`, gated on `event.status === 'completed'`)
+- [x] `frontend-public` Feedback page (star rating + comments); `frontend-admin` Feedback page (list + average)
+- [x] Verified
+
+Verified end-to-end with a real registration: submitted feedback (4 stars +
+comment) through the real star-rating UI, confirmed the admin Feedback page
+shows it with the correct average (4★) and attendee attribution.
+Confirmed the certificate button is correctly **hidden** on the ticket page
+while the event is still upcoming, then temporarily flipped the event to
+`completed`, downloaded the certificate, and read the actual rendered PDF —
+clean double-border layout, centered text, no overlaps (applying the lesson
+from Module 7's ticket-PDF bugs paid off: this one rendered correctly on the
+first try). Restored the event to `published` and removed all test data
+(including the test feedback document, via a direct one-off `mongosh`
+delete since there's intentionally no admin delete endpoint for feedback —
+it's meant to be an honest, immutable attendee record). `tests/verify.js`
+covers rating validation ahead of any DB lookup — 97/97 passing.
 
 ## Module 13 — Security & Access Control
 

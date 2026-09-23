@@ -442,6 +442,7 @@ const base = 'http://127.0.0.1:5099';
     ['DELETE', '/api/v1/admin/users/000000000000000000000000'],
     ['GET', '/api/v1/admin/reports/export/registrations.csv'],
     ['GET', '/api/v1/admin/reports/export/payments.csv'],
+    ['GET', '/api/v1/admin/feedback'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -600,7 +601,25 @@ const base = 'http://127.0.0.1:5099';
     return 'Dr. A,';
   });
 
-  console.log('\n=== 13. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 13. Feedback: rating validation (no DB touched) ===');
+
+  for (const bad of [0, 6, 2.5, 'x']) {
+    // eslint-disable-next-line no-await-in-loop
+    r = await (async () => {
+      const res = await fetch(base + '/api/v1/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrToken: 'whatever', rating: bad }),
+      });
+      return { res, body: await res.json() };
+    })();
+    check(`rejects rating=${JSON.stringify(bad)} before any DB lookup`, () => {
+      assert(r.res.status === 400, 'status ' + r.res.status);
+      return r.body.error.message;
+    });
+  }
+
+  console.log('\n=== 14. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

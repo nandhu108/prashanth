@@ -17,6 +17,8 @@ const publicTicketRoutes = require('./publicTicketRoutes');
 const adminCheckinRoutes = require('./adminCheckinRoutes');
 const adminReportRoutes = require('./adminReportRoutes');
 const adminUserRoutes = require('./adminUserRoutes');
+const publicFeedbackRoutes = require('./publicFeedbackRoutes');
+const adminFeedbackRoutes = require('./adminFeedbackRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -47,10 +49,11 @@ router.use('/tickets', publicTicketRoutes);
 router.use('/admin/checkin', adminCheckinRoutes);
 router.use('/admin/reports', adminReportRoutes);
 router.use('/admin/users', adminUserRoutes);
+router.use('/feedback', publicFeedbackRoutes);
+router.use('/admin/feedback', adminFeedbackRoutes);
 
 /*
  * Mount points reserved for upcoming modules:
- *   router.use('/feedback',            feedbackRoutes);          // Module 12 - Feedback
  *   router.use('/admin/audit-log',     adminAuditLogRoutes);     // Module 13 - Security
  */
 

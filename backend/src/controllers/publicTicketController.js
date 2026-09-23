@@ -5,16 +5,17 @@ const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { generateQrPngBuffer } = require('../utils/qrcode');
 const { streamTicketPdf } = require('../utils/ticketPdf');
+const { streamCertificatePdf } = require('../utils/certificatePdf');
 const env = require('../config/env');
 
 /**
  * The qrToken is unguessable (48 hex chars of crypto randomness) and IS the
- * access control for all three routes below — no further auth. Only
+ * access control for all four routes below — no further auth. Only
  * confirmed registrations ever have one (see Registration.issueQrToken()).
  */
 async function findTicketOr404(qrToken) {
   const reg = await Registration.findOne({ qrToken })
-    .populate('event', 'title startDate endDate venue mode timezone')
+    .populate('event', 'title startDate endDate venue mode timezone status')
     .populate('ticketType', 'name admitsCount');
   if (!reg) throw ApiError.notFound('Ticket not found');
   return reg;
@@ -60,4 +61,21 @@ const getTicketPdf = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getTicket, getTicketQrImage, getTicketPdf };
+/** GET /api/v1/tickets/:qrToken/certificate.pdf — available once the event has concluded. */
+const getCertificatePdf = asyncHandler(async (req, res) => {
+  const reg = await findTicketOr404(req.params.qrToken);
+  if (reg.event.status !== 'completed') {
+    throw ApiError.conflict('Certificates are issued once the event has concluded.');
+  }
+
+  if (!reg.certificateIssuedAt) {
+    reg.certificateIssuedAt = new Date();
+    await reg.save();
+  }
+
+  res.set('Content-Type', 'application/pdf');
+  res.set('Content-Disposition', `inline; filename="${reg.registrationCode}-certificate.pdf"`);
+  streamCertificatePdf(res, { event: reg.event, registration: reg });
+});
+
+module.exports = { getTicket, getTicketQrImage, getTicketPdf, getCertificatePdf };

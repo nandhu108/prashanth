@@ -36,6 +36,8 @@ export default function TicketPage() {
   const ticket = state.data;
   const qrImageUrl = `${BASE_URL}/api/v1/tickets/${qrToken}/qr.png`;
   const pdfUrl = `${BASE_URL}/api/v1/tickets/${qrToken}/pdf`;
+  const certificateUrl = `${BASE_URL}/api/v1/tickets/${qrToken}/certificate.pdf`;
+  const eventCompleted = ticket.event.status === 'completed';
 
   return (
     <>
@@ -83,6 +85,14 @@ export default function TicketPage() {
             <div className="ticket-card__actions">
               <Button variant="primary" href={pdfUrl} external>
                 Download PDF ticket
+              </Button>
+              {eventCompleted && (
+                <Button variant="secondary" href={certificateUrl} external>
+                  Download certificate
+                </Button>
+              )}
+              <Button variant="ghost" href={`/feedback/${qrToken}`}>
+                Give feedback
               </Button>
             </div>
           </div>

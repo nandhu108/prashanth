@@ -12,6 +12,7 @@ import Payments from './pages/Payments';
 import CheckIn from './pages/CheckIn';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
+import Feedback from './pages/Feedback';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -36,10 +37,7 @@ export default function App() {
           <Route path="/registrations" element={<Shielded><Registrations /></Shielded>} />
           <Route path="/payments" element={<Shielded><Payments /></Shielded>} />
           <Route path="/checkin" element={<Shielded><CheckIn /></Shielded>} />
-          <Route
-            path="/feedback"
-            element={<Shielded><ComingSoon title="Feedback" module="Module 12" /></Shielded>}
-          />
+          <Route path="/feedback" element={<Shielded><Feedback /></Shielded>} />
           <Route path="/reports" element={<Shielded><Reports /></Shielded>} />
           <Route
             path="/users"
