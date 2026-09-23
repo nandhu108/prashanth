@@ -18,6 +18,7 @@ const { signAdminToken, verifyAdminToken } = require('../src/utils/jwt');
 const { generateQrPngBuffer } = require('../src/utils/qrcode');
 const { normalizePhone } = require('../src/services/whatsapp/client');
 const { extractToken } = require('../src/controllers/adminCheckinController');
+const { toCsv } = require('../src/utils/csv');
 
 let pass = 0;
 let fail = 0;
@@ -439,6 +440,8 @@ const base = 'http://127.0.0.1:5099';
     ['POST', '/api/v1/admin/users'],
     ['PATCH', '/api/v1/admin/users/000000000000000000000000'],
     ['DELETE', '/api/v1/admin/users/000000000000000000000000'],
+    ['GET', '/api/v1/admin/reports/export/registrations.csv'],
+    ['GET', '/api/v1/admin/reports/export/payments.csv'],
   ];
 
   for (const [method, path] of guardedRoutes) {
@@ -575,7 +578,29 @@ const base = 'http://127.0.0.1:5099';
     return 'abc123';
   });
 
-  console.log('\n=== 12. PromoCode model: discount math & validity window ===');
+  console.log('\n=== 12. CSV export utility ===');
+
+  check('quotes cells containing commas, quotes or newlines', () => {
+    const csv = toCsv(
+      [{ name: 'Doe, Jane', note: 'Says "hello"\nagain' }],
+      [{ key: 'name', label: 'Name' }, { key: 'note', label: 'Note' }]
+    );
+    const lines = csv.split('\r\n');
+    assert(lines[0] === 'Name,Note', 'header wrong: ' + lines[0]);
+    assert(lines[1] === '"Doe, Jane","Says ""hello""\nagain"', 'row wrong: ' + JSON.stringify(lines[1]));
+    return 'escaped correctly';
+  });
+
+  check('reads dotted-path keys and leaves missing values blank', () => {
+    const csv = toCsv(
+      [{ attendee: { name: 'Dr. A' } }],
+      [{ key: 'attendee.name', label: 'Name' }, { key: 'attendee.missing', label: 'Missing' }]
+    );
+    assert(csv.split('\r\n')[1] === 'Dr. A,', 'got ' + csv.split('\r\n')[1]);
+    return 'Dr. A,';
+  });
+
+  console.log('\n=== 13. PromoCode model: discount math & validity window ===');
 
   const mkPromo = (o) => new PromoCode({ event: new mongoose.Types.ObjectId(), code: 'X', value: 10, ...o });
 

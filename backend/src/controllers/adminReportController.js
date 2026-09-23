@@ -2,8 +2,10 @@
 
 const { Types } = require('mongoose');
 const Registration = require('../models/Registration');
+const Payment = require('../models/Payment');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
+const { toCsv } = require('../utils/csv');
 
 /**
  * GET /api/v1/admin/reports/overview?event=<eventId>
@@ -57,4 +59,77 @@ function toObjectId(id) {
   return new Types.ObjectId(String(id));
 }
 
-module.exports = { getOverview };
+const REGISTRATION_COLUMNS = [
+  { key: 'registrationCode', label: 'Registration Code' },
+  { key: 'attendee.name', label: 'Attendee Name' },
+  { key: 'attendee.email', label: 'Email' },
+  { key: 'attendee.phone', label: 'Phone' },
+  { key: 'attendee.participantType', label: 'Participant Type' },
+  { key: 'ticketTypeName', label: 'Pass' },
+  { key: 'status', label: 'Status' },
+  { key: 'pricing.basePrice', label: 'Base Price' },
+  { key: 'pricing.discountAmount', label: 'Discount' },
+  { key: 'pricing.taxAmount', label: 'Tax' },
+  { key: 'pricing.totalAmount', label: 'Total' },
+  { key: 'campaignSource', label: 'Campaign Source' },
+  { key: 'checkedInAtStr', label: 'Checked In At' },
+  { key: 'createdAtStr', label: 'Registered At' },
+];
+
+/** GET /api/v1/admin/reports/export/registrations.csv?event=<eventId> */
+const exportRegistrationsCsv = asyncHandler(async (req, res) => {
+  if (!req.query.event) throw ApiError.badRequest('An "event" id is required.');
+
+  const registrations = await Registration.find({ event: req.query.event })
+    .populate('ticketType', 'name')
+    .sort({ createdAt: 1 });
+
+  const rows = registrations.map((r) => ({
+    ...r.toObject(),
+    ticketTypeName: r.ticketType?.name || '',
+    checkedInAtStr: r.checkedInAt ? r.checkedInAt.toISOString() : '',
+    createdAtStr: r.createdAt.toISOString(),
+  }));
+
+  const csv = toCsv(rows, REGISTRATION_COLUMNS);
+  res.set('Content-Type', 'text/csv; charset=utf-8');
+  res.set('Content-Disposition', 'attachment; filename="registrations.csv"');
+  res.send(csv);
+});
+
+const PAYMENT_COLUMNS = [
+  { key: 'registrationCode', label: 'Registration Code' },
+  { key: 'attendeeName', label: 'Attendee Name' },
+  { key: 'razorpayOrderId', label: 'Order ID' },
+  { key: 'razorpayPaymentId', label: 'Payment ID' },
+  { key: 'amountRupees', label: 'Amount (INR)' },
+  { key: 'status', label: 'Status' },
+  { key: 'method', label: 'Method' },
+  { key: 'createdAtStr', label: 'Created At' },
+];
+
+/** GET /api/v1/admin/reports/export/payments.csv?event=<eventId> */
+const exportPaymentsCsv = asyncHandler(async (req, res) => {
+  if (!req.query.event) throw ApiError.badRequest('An "event" id is required.');
+
+  const payments = await Payment.find()
+    .populate({ path: 'registration', match: { event: req.query.event }, select: 'registrationCode attendee' })
+    .sort({ createdAt: 1 });
+
+  const rows = payments
+    .filter((p) => p.registration) // the populate match above drops non-matching refs to null
+    .map((p) => ({
+      ...p.toObject(),
+      registrationCode: p.registration.registrationCode,
+      attendeeName: p.registration.attendee.name,
+      amountRupees: (p.amount / 100).toFixed(2),
+      createdAtStr: p.createdAt.toISOString(),
+    }));
+
+  const csv = toCsv(rows, PAYMENT_COLUMNS);
+  res.set('Content-Type', 'text/csv; charset=utf-8');
+  res.set('Content-Disposition', 'attachment; filename="payments.csv"');
+  res.send(csv);
+});
+
+module.exports = { getOverview, exportRegistrationsCsv, exportPaymentsCsv };

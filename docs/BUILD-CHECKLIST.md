@@ -234,11 +234,31 @@ Test user, ticket type and registrations all cleaned up afterward.
 `tests/verify.js` route-guard coverage extended to `/admin/reports` and
 `/admin/users` (88/88 passing).
 
-## Module 11 — Reports & Export
+## Module 11 — Reports & Export ✅
 
-- [ ] Aggregation endpoint + CSV export utility
-- [ ] `frontend-admin` Reports page
-- [ ] Verified
+- [x] Aggregation endpoint (shared with Module 10's overview) + hand-rolled CSV export utility
+- [x] `frontend-admin` Reports page (stat tiles, revenue-by-pass chart, CSV downloads)
+- [x] Verified
+
+Verified end-to-end, not just that the endpoint returns 200: clicked "Export
+registrations CSV" in the real browser (token-authenticated download via
+fetch+blob, since a plain `<a href>` can't carry a Bearer header) and read
+the downloaded file back — correct header row, correct escaping, 14 rows
+matching the actual registration history including historical
+cancelled/refunded ones. `tests/verify.js` covers the CSV utility directly
+(comma/quote/newline escaping, dotted-path key lookup, missing-value
+blanking) — 92/92 passing.
+
+Found and fixed a real chart bug via screenshot, not caught by the DB-free
+suite: when every confirmed registration is on a free pass (all-zero
+revenue), recharts can't infer a real scale from an all-zero dataset and
+fabricates a small linear 0–4 axis — which, run through the currency
+tick-formatter, rendered as "₹1, ₹2, ₹3, ₹4" next to bars that were
+actually zero. A chart implying nonexistent revenue is worse than no chart.
+Fixed by detecting `overview.revenue === 0` and showing an honest
+"No paid revenue yet — N confirmed registrations, all on free passes"
+empty state instead of a bar chart with a fabricated scale. Re-verified with
+a fresh screenshot. Test data cleaned up afterward.
 
 ## Module 12 — Feedback & Certificates
 

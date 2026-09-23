@@ -11,6 +11,7 @@ import Registrations from './pages/Registrations';
 import Payments from './pages/Payments';
 import CheckIn from './pages/CheckIn';
 import Users from './pages/Users';
+import Reports from './pages/Reports';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -39,10 +40,7 @@ export default function App() {
             path="/feedback"
             element={<Shielded><ComingSoon title="Feedback" module="Module 12" /></Shielded>}
           />
-          <Route
-            path="/reports"
-            element={<Shielded><ComingSoon title="Reports" module="Module 11" /></Shielded>}
-          />
+          <Route path="/reports" element={<Shielded><Reports /></Shielded>} />
           <Route
             path="/users"
             element={<Shielded roles={['superadmin']}><Users /></Shielded>}

@@ -48,8 +48,8 @@ This repository is being delivered **module by module**. This is the state after
 | 8   | WhatsApp Integration      | **Done** |
 | 9   | Event-Day Check-in        | **Done** |
 | 10  | Admin Dashboard           | **Done** |
-| 11  | Reports & Export          | Next     |
-| 12  | Feedback & Certificates   | Planned  |
+| 11  | Reports & Export          | **Done** |
+| 12  | Feedback & Certificates   | Next     |
 | 13  | Security & Access Control | Planned  |
 | 14  | Deployment & Go-Live      | Planned  |
 | 15  | Support                   | Planned  |
