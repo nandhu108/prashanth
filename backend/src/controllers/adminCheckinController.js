@@ -3,6 +3,7 @@
 const Registration = require('../models/Registration');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
+const { recordAudit } = require('../services/auditLog');
 
 /**
  * The scanner reads whatever the QR encodes — a full
@@ -47,6 +48,7 @@ const scanTicket = asyncHandler(async (req, res) => {
   reg.checkedInBy = req.user._id;
   await reg.save();
 
+  recordAudit(req, { action: 'registration.checkin', entityType: 'Registration', entityId: reg._id, meta: { registrationCode: reg.registrationCode } });
   return sendSuccess(res, { result: 'success', checkedInAt: reg.checkedInAt, ...payload });
 });
 

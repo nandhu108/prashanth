@@ -13,6 +13,7 @@ import CheckIn from './pages/CheckIn';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Feedback from './pages/Feedback';
+import AuditLog from './pages/AuditLog';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -45,11 +46,7 @@ export default function App() {
           />
           <Route
             path="/audit-log"
-            element={
-              <Shielded roles={['superadmin']}>
-                <ComingSoon title="Audit Log" module="Module 13" />
-              </Shielded>
-            }
+            element={<Shielded roles={['superadmin']}><AuditLog /></Shielded>}
           />
           <Route
             path="/help"

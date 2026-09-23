@@ -281,12 +281,29 @@ delete since there's intentionally no admin delete endpoint for feedback —
 it's meant to be an honest, immutable attendee record). `tests/verify.js`
 covers rating validation ahead of any DB lookup — 97/97 passing.
 
-## Module 13 — Security & Access Control
+## Module 13 — Security & Access Control ✅
 
-- [ ] AuditLog model + `recordAudit()` wired into admin mutations
-- [ ] Login lockout verified; CORS admin origin added
-- [ ] `frontend-admin` Audit Log page
-- [ ] Role matrix documented in `docs/API.md`
+- [x] AuditLog model + `recordAudit()` wired into every admin mutation (Event
+      CMS, Ticket Types, Promo Codes, Registrations, Users, Check-in)
+- [x] Login lockout verified; CORS admin origin added (both already in
+      place since Foundation, re-verified here)
+- [x] `frontend-admin` Audit Log page
+- [x] Role matrix documented in `docs/API.md`
+
+Verified with real actions, not synthetic ones: patched the live event's
+tagline, created and deleted a real promo code, and created a test
+`manager` user — all four showed up correctly in `GET /admin/audit-log`
+with the right actor, action, entity and metadata (screenshot confirms
+color-coded action badges: green=create, blue=update, red=delete).
+Confirmed the RBAC boundary directly via `curl` with a real `manager`-role
+token (not just "the nav item is hidden"): `403` on `/admin/users` and
+`/admin/audit-log`, `200` on `/admin/events` — exactly matching the role
+matrix now documented in `docs/API.md`. Password fields are explicitly
+excluded from audit `meta` (only a `passwordReset: true/false` boolean is
+logged, never the value). Test manager user cleaned up afterward; the
+audit trail itself was left intact as the honest historical record it's
+meant to be. `tests/verify.js` route-guard coverage extended to
+`/admin/audit-log` (98/98 passing).
 
 ## Module 14 — Deployment & Go-Live
 

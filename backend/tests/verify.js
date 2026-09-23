@@ -443,6 +443,7 @@ const base = 'http://127.0.0.1:5099';
     ['GET', '/api/v1/admin/reports/export/registrations.csv'],
     ['GET', '/api/v1/admin/reports/export/payments.csv'],
     ['GET', '/api/v1/admin/feedback'],
+    ['GET', '/api/v1/admin/audit-log'],
   ];
 
   for (const [method, path] of guardedRoutes) {

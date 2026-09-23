@@ -5,6 +5,7 @@ const Event = require('../models/Event');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializePromoCodeForAdmin } = require('../services/promoCodeSerializer');
+const { recordAudit } = require('../services/auditLog');
 
 const EDITABLE_FIELDS = [
   'code',
@@ -49,6 +50,7 @@ const createPromoCode = asyncHandler(async (req, res) => {
   const promo = new PromoCode({ event: eventId });
   applyEditableFields(promo, req.body || {});
   await promo.save();
+  recordAudit(req, { action: 'promoCode.create', entityType: 'PromoCode', entityId: promo._id, meta: { code: promo.code } });
   return sendSuccess(res, serializePromoCodeForAdmin(promo), { status: 201 });
 });
 
@@ -57,6 +59,7 @@ const updatePromoCode = asyncHandler(async (req, res) => {
   const promo = await findOr404(req.params.id);
   applyEditableFields(promo, req.body || {});
   await promo.save();
+  recordAudit(req, { action: 'promoCode.update', entityType: 'PromoCode', entityId: promo._id, meta: { fields: Object.keys(req.body || {}) } });
   return sendSuccess(res, serializePromoCodeForAdmin(promo));
 });
 
@@ -67,6 +70,7 @@ const deletePromoCode = asyncHandler(async (req, res) => {
     throw ApiError.conflict('This code has been redeemed. Deactivate it instead of deleting.');
   }
   await promo.deleteOne();
+  recordAudit(req, { action: 'promoCode.delete', entityType: 'PromoCode', entityId: promo._id, meta: { code: promo.code } });
   return sendSuccess(res, null, { status: 200, message: 'Promo code deleted' });
 });
 

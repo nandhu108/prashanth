@@ -6,6 +6,7 @@ const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializeRegistrationForAdmin } = require('../services/registrationSerializer');
 const inventory = require('../services/inventory');
 const { sendTicketConfirmation } = require('../services/whatsapp/sendTicket');
+const { recordAudit } = require('../services/auditLog');
 
 /** GET /api/v1/admin/registrations?event=&status=&q=&page=&limit= */
 const listRegistrations = asyncHandler(async (req, res) => {
@@ -56,6 +57,7 @@ const updateRegistration = asyncHandler(async (req, res) => {
     reg.attendee = { ...reg.attendee.toObject(), ...req.body.attendee };
   }
   await reg.save();
+  recordAudit(req, { action: 'registration.update', entityType: 'Registration', entityId: reg._id, meta: { fields: Object.keys(req.body || {}) } });
   return sendSuccess(res, serializeRegistrationForAdmin(reg));
 });
 
@@ -78,6 +80,7 @@ const cancelRegistration = asyncHandler(async (req, res) => {
   if (req.body?.reason) reg.notes = `${reg.notes ? reg.notes + ' | ' : ''}Cancelled: ${req.body.reason}`;
   await reg.save();
 
+  recordAudit(req, { action: 'registration.cancel', entityType: 'Registration', entityId: reg._id, meta: { reason: req.body?.reason || '' } });
   return sendSuccess(res, serializeRegistrationForAdmin(reg));
 });
 
@@ -102,6 +105,7 @@ const resendTicket = asyncHandler(async (req, res) => {
     throw ApiError.conflict('WhatsApp send failed. Check the server logs for details.');
   }
 
+  recordAudit(req, { action: 'registration.resendTicket', entityType: 'Registration', entityId: reg._id });
   return sendSuccess(res, { sent: true }, { message: `Ticket resent to ${reg.attendee.phone}` });
 });
 

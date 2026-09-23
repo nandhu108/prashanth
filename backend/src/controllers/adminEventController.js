@@ -4,6 +4,7 @@ const Event = require('../models/Event');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializeEventForAdmin, serializeEventAdminCard } = require('../services/adminEventSerializer');
+const { recordAudit } = require('../services/auditLog');
 
 // Top-level fields the CMS may write directly. Nested arrays (speakers,
 // agenda, sponsors, faqs, announcements) go through their own replace
@@ -56,6 +57,7 @@ const createEvent = asyncHandler(async (req, res) => {
   const event = new Event({ status: 'draft' });
   applyEditableFields(event, req.body || {});
   await event.save();
+  recordAudit(req, { action: 'event.create', entityType: 'Event', entityId: event._id, meta: { title: event.title } });
   return sendSuccess(res, serializeEventForAdmin(event), { status: 201 });
 });
 
@@ -70,6 +72,7 @@ const updateEvent = asyncHandler(async (req, res) => {
   const event = await findOr404(req.params.id);
   applyEditableFields(event, req.body || {});
   await event.save();
+  recordAudit(req, { action: 'event.update', entityType: 'Event', entityId: event._id, meta: { fields: Object.keys(req.body || {}) } });
   return sendSuccess(res, serializeEventForAdmin(event));
 });
 
@@ -80,6 +83,7 @@ const deleteEvent = asyncHandler(async (req, res) => {
     throw ApiError.conflict('Only draft events can be deleted. Set status to "cancelled" instead.');
   }
   await event.deleteOne();
+  recordAudit(req, { action: 'event.delete', entityType: 'Event', entityId: event._id, meta: { title: event.title } });
   return sendSuccess(res, null, { status: 200, message: 'Event deleted' });
 });
 
@@ -91,6 +95,7 @@ function replaceArrayField(field) {
     if (!Array.isArray(value)) throw ApiError.badRequest(`Expected "${field}" to be an array.`);
     event[field] = value;
     await event.save();
+    recordAudit(req, { action: `event.${field}.replace`, entityType: 'Event', entityId: event._id, meta: { count: value.length } });
     return sendSuccess(res, serializeEventForAdmin(event)[field]);
   });
 }

@@ -19,6 +19,7 @@ const adminReportRoutes = require('./adminReportRoutes');
 const adminUserRoutes = require('./adminUserRoutes');
 const publicFeedbackRoutes = require('./publicFeedbackRoutes');
 const adminFeedbackRoutes = require('./adminFeedbackRoutes');
+const adminAuditLogRoutes = require('./adminAuditLogRoutes');
 const { sendSuccess } = require('../utils/response');
 
 const router = express.Router();
@@ -51,10 +52,6 @@ router.use('/admin/reports', adminReportRoutes);
 router.use('/admin/users', adminUserRoutes);
 router.use('/feedback', publicFeedbackRoutes);
 router.use('/admin/feedback', adminFeedbackRoutes);
-
-/*
- * Mount points reserved for upcoming modules:
- *   router.use('/admin/audit-log',     adminAuditLogRoutes);     // Module 13 - Security
- */
+router.use('/admin/audit-log', adminAuditLogRoutes);
 
 module.exports = router;

@@ -5,6 +5,7 @@ const Event = require('../models/Event');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { serializeTicketTypeForAdmin } = require('../services/adminTicketTypeSerializer');
+const { recordAudit } = require('../services/auditLog');
 
 const EDITABLE_FIELDS = [
   'name',
@@ -58,6 +59,7 @@ const createTicketType = asyncHandler(async (req, res) => {
   const ticket = new TicketType({ event: eventId });
   applyEditableFields(ticket, req.body || {});
   await ticket.save();
+  recordAudit(req, { action: 'ticketType.create', entityType: 'TicketType', entityId: ticket._id, meta: { name: ticket.name } });
   return sendSuccess(res, serializeTicketTypeForAdmin(ticket), { status: 201 });
 });
 
@@ -66,6 +68,7 @@ const updateTicketType = asyncHandler(async (req, res) => {
   const ticket = await findOr404(req.params.id);
   applyEditableFields(ticket, req.body || {});
   await ticket.save();
+  recordAudit(req, { action: 'ticketType.update', entityType: 'TicketType', entityId: ticket._id, meta: { fields: Object.keys(req.body || {}) } });
   return sendSuccess(res, serializeTicketTypeForAdmin(ticket));
 });
 
@@ -76,6 +79,7 @@ const deleteTicketType = asyncHandler(async (req, res) => {
     throw ApiError.conflict('This pass has sales against it. Deactivate it instead of deleting.');
   }
   await ticket.deleteOne();
+  recordAudit(req, { action: 'ticketType.delete', entityType: 'TicketType', entityId: ticket._id, meta: { name: ticket.name } });
   return sendSuccess(res, null, { status: 200, message: 'Ticket type deleted' });
 });
 

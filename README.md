@@ -50,8 +50,8 @@ This repository is being delivered **module by module**. This is the state after
 | 10  | Admin Dashboard           | **Done** |
 | 11  | Reports & Export          | **Done** |
 | 12  | Feedback & Certificates   | **Done** |
-| 13  | Security & Access Control | Next     |
-| 14  | Deployment & Go-Live      | Planned  |
+| 13  | Security & Access Control | **Done** |
+| 14  | Deployment & Go-Live      | Next     |
 | 15  | Support                   | Planned  |
 
 

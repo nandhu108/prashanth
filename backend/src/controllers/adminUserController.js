@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const { sendSuccess, asyncHandler } = require('../utils/response');
 const { hashPassword } = require('../utils/password');
 const { serializeUser } = require('../services/userSerializer');
+const { recordAudit } = require('../services/auditLog');
 
 /** GET /api/v1/admin/users */
 const listUsers = asyncHandler(async (req, res) => {
@@ -28,6 +29,7 @@ const createUser = asyncHandler(async (req, res) => {
     role: ['superadmin', 'manager', 'checkin_staff'].includes(role) ? role : 'manager',
   });
 
+  recordAudit(req, { action: 'user.create', entityType: 'User', entityId: user._id, meta: { email: user.email, role: user.role } });
   return sendSuccess(res, serializeUser(user), { status: 201 });
 });
 
@@ -54,6 +56,13 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   await user.save();
+  recordAudit(req, {
+    action: 'user.update',
+    entityType: 'User',
+    entityId: user._id,
+    // Never log the password itself — only whether one was reset.
+    meta: { fields: Object.keys(req.body || {}).filter((k) => k !== 'newPassword'), passwordReset: Boolean(req.body.newPassword) },
+  });
   return sendSuccess(res, serializeUser(user));
 });
 
@@ -65,6 +74,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) throw ApiError.notFound('User not found');
   await user.deleteOne();
+  recordAudit(req, { action: 'user.delete', entityType: 'User', entityId: user._id, meta: { email: user.email } });
   return sendSuccess(res, null, { status: 200, message: 'User deleted' });
 });
 

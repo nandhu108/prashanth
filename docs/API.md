@@ -234,15 +234,53 @@ can persist it on the registration record and Module 10 can report on it.
 
 ---
 
-## Reserved mount points
+## Admin API & RBAC
 
-Routes for later modules mount under `/api/v1`:
+Everything under `/api/v1/admin/*` requires `Authorization: Bearer <token>`,
+obtained from `POST /api/v1/admin/auth/login` (rate-limited to 20 attempts /
+15 min, plus a per-account lockout after 5 wrong passwords). Tokens are
+JWTs signed with `JWT_SECRET`, default 7-day expiry (`JWT_EXPIRES_IN`).
 
-| Path | Module |
-|------------------------------|-----------------------------|
-| `/admin/*` | 2 — Event CMS |
-| `/registration/*` | 3 — Registration |
-| `/tickets/*` | 4 — Ticketing |
-| `/promo/*` | 5 — Promo codes |
-| `/payments/*`, `/payments/webhook` | 6 — Payment gateway |
-| `/checkin/*` | 9 — Event-day check-in |
+### Role matrix
+
+Three roles, checked server-side by `requireRole(...)` on every route — the
+admin UI hiding a nav item is a convenience, not the security boundary.
+
+| Area | Route prefix | `superadmin` | `manager` | `checkin_staff` |
+|---------------------------|------------------------------|:---:|:---:|:---:|
+| Event CMS | `/admin/events`, `/admin/uploads` | ✅ | ✅ | ❌ |
+| Ticket types | `/admin/ticket-types` | ✅ | ✅ | ❌ |
+| Promo codes | `/admin/promo` | ✅ | ✅ | ❌ |
+| Registrations | `/admin/registrations` | ✅ | ✅ | ❌ |
+| Payments (read-only) | `/admin/payments` | ✅ | ✅ | ❌ |
+| Reports & CSV export | `/admin/reports` | ✅ | ✅ | ❌ |
+| Feedback | `/admin/feedback` | ✅ | ✅ | ❌ |
+| Event-day check-in | `/admin/checkin` | ✅ | ✅ | ✅ |
+| Users & roles | `/admin/users` | ✅ | ❌ | ❌ |
+| Audit log | `/admin/audit-log` | ✅ | ❌ | ❌ |
+
+A `checkin_staff` account exists for exactly one purpose — scanning tickets
+on event day — and is deliberately locked out of everything else, including
+read-only views of registrations or payments.
+
+### Endpoint index
+
+Public endpoints need no auth; `/admin/*` need a bearer token per the table
+above. Full request/response shapes are in each controller's JSDoc comment
+(`backend/src/controllers/`) rather than duplicated here.
+
+| Prefix | Module | Notes |
+|-------------------------------------|--------|-------|
+| `/public/events` | 1 | Read-only, published events only |
+| `/admin/auth` | Foundation | `POST /login`, `GET /me` |
+| `/admin/events`, `/admin/uploads` | 2 | Event CMS + image upload |
+| `/admin/ticket-types` | 4 | Pass CRUD |
+| `/admin/promo`, `/promo/validate` | 5 | Promo codes (admin + public preview) |
+| `/registrations`, `/admin/registrations` | 3 | Registration create (public) + management (admin) |
+| `/payments`, `/admin/payments` | 6 | Razorpay order/verify/webhook + read-only ledger |
+| `/tickets` | 7 | QR image, PDF ticket, certificate — keyed by `qrToken` |
+| `/admin/checkin` | 9 | Scan + live stats |
+| `/admin/reports` | 10, 11 | Overview stats + CSV export |
+| `/admin/users` | 10, 13 | User/role management, superadmin-only |
+| `/feedback`, `/admin/feedback` | 12 | Submit (public, `qrToken`-gated) + list (admin) |
+| `/admin/audit-log` | 13 | Who did what, superadmin-only |
