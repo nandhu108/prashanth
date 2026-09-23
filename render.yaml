@@ -1,0 +1,50 @@
+# Render Blueprint for the API. Frontends live on Vercel, database on MongoDB Atlas.
+# See docs/DEPLOYMENT.md -> "Production on Vercel + Render + Atlas".
+services:
+  - type: web
+    name: prashanth-events-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # A persistent disk (needed so CMS image uploads survive redeploys)
+    # requires a paid instance type; free instances have no disk.
+    plan: starter
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    disk:
+      name: uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: UPLOAD_DIR
+        value: /app/uploads
+      # Vercel rewrite + Render's own proxy = 2 hops before the API.
+      - key: TRUST_PROXY
+        value: "2"
+      - key: JWT_SECRET
+        generateValue: true
+      # Secrets and per-deployment values: paste these in the Render dashboard.
+      - key: MONGODB_URI
+        sync: false
+      - key: PUBLIC_SITE_URL
+        sync: false # e.g. https://ciim2026.vercel.app (used in ticket links)
+      - key: API_BASE_URL
+        sync: false # this service's own https URL
+      - key: CORS_ORIGINS
+        sync: false # both Vercel URLs, comma separated (belt and braces)
+      - key: ADMIN_BOOTSTRAP_EMAIL
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false

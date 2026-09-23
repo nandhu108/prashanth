@@ -8,6 +8,65 @@ through Module 14.
 
 ---
 
+## Production on Vercel + Render + Atlas
+
+The two React apps are static and go on **Vercel**; the Express API runs from
+the same Docker image on **Render** (it needs a persistent disk for CMS image
+uploads, which Vercel serverless doesn't have); the database is **MongoDB
+Atlas**. Each Vercel app proxies `/api/*` and `/uploads/*` to Render through
+`vercel.json` rewrites, so the browser only ever talks to one origin — no CORS
+or frontend code changes.
+
+```
+Browser ─► Vercel (public site / admin)  ──/api, /uploads──►  Render (API)  ──►  Atlas
+```
+
+Do these in order (the API URL is needed by the Vercel step, so the API goes first):
+
+1. **MongoDB Atlas** — create a free M0 cluster, a database user, and under
+   *Network Access* allow `0.0.0.0/0` (Render's outbound IPs are not fixed).
+   Copy the connection string and add the database name:
+   `mongodb+srv://USER:PASS@cluster.mongodb.net/prashanth_events`.
+2. **Render (API)** — *New → Blueprint*, pick this repo; it reads `render.yaml`.
+   Fill in the `sync: false` values: `MONGODB_URI`, `ADMIN_BOOTSTRAP_EMAIL`,
+   `ADMIN_BOOTSTRAP_PASSWORD` (use a strong one — **not** the `.env.example`
+   default), and leave Razorpay/WhatsApp blank until you have real keys
+   (they degrade to a clear "not configured" message). `JWT_SECRET` is
+   generated for you. Note the service URL, e.g. `https://prashanth-events-api.onrender.com`.
+   The persistent disk needs a paid instance (`starter`).
+3. **Vercel (two projects)** — *Add New → Project*, import the same repo twice:
+   | Project | Root Directory | Env vars |
+   |---|---|---|
+   | public site | `frontend-public` | `VITE_DEFAULT_EVENT_SLUG` (the event slug) |
+   | admin | `frontend-admin` | `VITE_PUBLIC_SITE_URL` (the public site's Vercel URL) |
+
+   Before deploying, replace `YOUR-API.onrender.com` with the real Render host in
+   **both** `frontend-public/vercel.json` and `frontend-admin/vercel.json`, and commit.
+4. **Back on Render**, set `PUBLIC_SITE_URL` (public site's URL — used in
+   ticket/WhatsApp links), `API_BASE_URL` (the Render URL) and `CORS_ORIGINS`
+   (both Vercel URLs, comma separated), then redeploy.
+5. **Seed the first admin** (and optionally the sample event) from your laptop
+   against Atlas — the API container has no shell on the starter plan:
+   ```bash
+   cd backend
+   MONGODB_URI="mongodb+srv://..." ADMIN_BOOTSTRAP_EMAIL=... ADMIN_BOOTSTRAP_PASSWORD=... npm run seed:admin
+   # npm run seed  # sample CIIM event with DEMO speakers/passes/agenda - skip for a real launch
+   ```
+   For a real launch, create the event and passes in the admin CMS instead.
+6. **Razorpay** (when ready) — set the three `RAZORPAY_*` vars, then in the Razorpay
+   dashboard add a webhook to `https://<render-host>/api/v1/payments/webhook`
+   with the same secret as `RAZORPAY_WEBHOOK_SECRET`.
+7. **Custom domains** — add them in each Vercel project; update `PUBLIC_SITE_URL`
+   and `CORS_ORIGINS` on Render to match.
+
+`TRUST_PROXY=2` (already in `render.yaml`) makes the API read the visitor's real
+IP through the Vercel → Render chain. Without it every visitor would share one
+rate-limit bucket and login-lockout counter.
+
+The Docker/VPS route below still works unchanged if you'd rather self-host everything.
+
+---
+
 ## Target architecture
 
 ```

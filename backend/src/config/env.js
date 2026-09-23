@@ -41,6 +41,9 @@ const env = {
   mongoUri: read('MONGODB_URI', 'mongodb://127.0.0.1:27017/prashanth_events', {
     required: true,
   }),
+  // Number of reverse proxies in front of the API whose X-Forwarded-For entry
+  // is trusted: 1 for NGINX/compose, 2 for Vercel rewrite -> Render.
+  trustProxy: readInt('TRUST_PROXY', 1),
   publicSiteUrl: read('PUBLIC_SITE_URL', 'http://localhost:5173'),
   apiBaseUrl: read('API_BASE_URL', 'http://localhost:5000'),
   corsOrigins: readList('CORS_ORIGINS', [

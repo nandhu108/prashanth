@@ -14,8 +14,8 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// Behind NGINX: trust the proxy so rate limiting and logging see real client IPs.
-app.set('trust proxy', 1);
+// Behind reverse proxies: trust them so rate limiting and logging see real client IPs.
+app.set('trust proxy', env.trustProxy);
 app.disable('x-powered-by');
 
 app.use(
