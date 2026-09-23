@@ -1,5 +1,10 @@
 # Delivery Roadmap
 
+> **Status:** all 15 modules below have now been delivered. This document is
+> kept as the original pre-build scope/dependency plan; for what was actually
+> built in each module and how it was verified, see
+> [`docs/BUILD-CHECKLIST.md`](BUILD-CHECKLIST.md) instead.
+
 Modules are delivered one at a time. Each builds on what is already running, so
 nothing is thrown away between stages.
 

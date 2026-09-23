@@ -4,36 +4,39 @@ A complete digital platform for running Fertility & Gynaecology events: a premiu
 public microsite, registration and ticketing, payments, WhatsApp delivery,
 event-day QR check-in, and an admin dashboard.
 
-This repository is being delivered **module by module**. This is the state after
-**Module 1**.
+This repository was delivered **module by module**, all 15 tracked in
+[`docs/BUILD-CHECKLIST.md`](docs/BUILD-CHECKLIST.md) with what was built and
+how each was actually verified (not just "it returns 200" — real registrations,
+real payments-flow testing, real screenshots).
 
 ---
 
 ## Delivered so far
 
-### ✅ Module 1 — Platform foundation + Premium Event Microsite
+**Public microsite** (`frontend-public`) — branded hero with a live countdown,
+speakers, agenda, sponsors, FAQ, SEO/JSON-LD, WhatsApp-first sharing, and the
+full attendee journey: pick a pass → register → pay (Razorpay) → get a QR
+ticket + PDF → check in on event day → leave feedback → download a
+certificate once the event concludes.
 
-**Backend foundation**
+**Admin dashboard** (`frontend-admin`) — a separate app, same design system,
+behind JWT auth with three roles (`superadmin`/`manager`/`checkin_staff`
+enforced server-side, not just hidden nav): Event CMS, ticket types, promo
+codes, registrations, a read-only payments ledger, a camera-based check-in
+scanner, live stats + charts, CSV export, feedback, user management and an
+audit log of every admin action.
 
-- Express 4 API with a single `{ success, data }` response envelope
-- MongoDB/Mongoose data layer: `Event` and `TicketType`
-- Security: helmet, CORS allow-list, rate limiting, graceful shutdown
-- Central error handling that never leaks internals in production
-- Public serializer that keeps internal inventory counts off the wire
-- Realistic seed data for a full CME summit
+**Backend** (`backend`) — Express 4 API, one `{success,data}` envelope,
+MongoDB/Mongoose, Razorpay + Meta WhatsApp Cloud API integrations that both
+degrade gracefully (clear "not configured" messaging, never a crash) until
+real credentials are supplied, and a 98-check verification suite
+(`backend/tests/verify.js`) that needs no live database.
 
-**Premium Event Microsite**
+**Docker** is the standard way to run all of it — `mongo`, `api`, `web`
+(public site) and `admin` in one `docker-compose.yml`, the same file used
+locally and in production (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)).
 
-- Branded hero with live countdown, key facts and registration state
-- About, speakers, agenda timeline, pass selection, venue + map, sponsors, FAQ
-- SEO: meta tags, Open Graph / Twitter cards, `schema.org/Event` JSON-LD
-- Campaign source capture (WhatsApp / Instagram / QR poster / direct)
-- Share sheet with WhatsApp-first sharing
-- Fully responsive, keyboard accessible, print-friendly agenda
-
-
-
-### Upcoming modules
+### Module status
 
 
 | #   | Module                    | Status   |
@@ -51,8 +54,8 @@ This repository is being delivered **module by module**. This is the state after
 | 11  | Reports & Export          | **Done** |
 | 12  | Feedback & Certificates   | **Done** |
 | 13  | Security & Access Control | **Done** |
-| 14  | Deployment & Go-Live      | Next     |
-| 15  | Support                   | Planned  |
+| 14  | Deployment & Go-Live      | **Done** |
+| 15  | Support                   | Next     |
 
 
 ---
@@ -124,12 +127,24 @@ cd backend && npm run mock    # serves the real seed payload on :5000
 
 ### Docker
 
+The standard way to run the whole platform — mongo, api, the public
+microsite and the admin dashboard — in one command:
+
 ```bash
 cp backend/.env.example backend/.env
-docker compose up --build
-docker compose exec api npm run seed
+docker compose up --build -d
+docker compose exec api npm run seed          # sample event + 5 passes
+docker compose exec api npm run seed:admin    # bootstraps the first superadmin
+
 # microsite: http://localhost:8080
+# admin:     http://localhost:8082  (login with ADMIN_BOOTSTRAP_EMAIL/PASSWORD from backend/.env)
+# API:       http://localhost:8080/api/v1/health
 ```
+
+Payments (Razorpay) and WhatsApp sends stay dev-safe with no configuration —
+add real test-mode keys to `backend/.env` to turn them on. See
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the production setup
+(TLS, backups, CI).
 
 ---
 
@@ -141,12 +156,14 @@ docker compose exec api npm run seed
 cd backend && npm run verify
 ```
 
-Runs 35 checks over the models, virtuals, public serializer and HTTP layer —
-including that internal inventory counts and non-public passes never reach the
-browser. No database required.
+Runs 98 checks across every module's models, serializers, auth/RBAC guards,
+payment signature math, QR/CSV utilities and HTTP layer — including that
+internal inventory counts and non-public passes never reach the browser.
+No database required.
 
 ```bash
 cd frontend-public && npm run build
+cd frontend-admin && npm run build
 ```
 
 ---
@@ -159,40 +176,55 @@ cd frontend-public && npm run build
 prashanth-events/
 ├── backend/
 │   ├── src/
-│   │   ├── config/          env + database connection
-│   │   ├── models/          Event, TicketType
-│   │   ├── controllers/     public event endpoints
-│   │   ├── services/        public serializer (what leaves the API)
-│   │   ├── routes/          API mounting, health check
-│   │   ├── middleware/      error handling
-│   │   ├── utils/           logger, ApiError, response envelope
-│   │   ├── seed/            sample event data
+│   │   ├── config/          env, database connection, upload path
+│   │   ├── models/          Event, TicketType, User, Registration, Payment,
+│   │   │                    PromoCode, Feedback, AuditLog
+│   │   ├── controllers/     public + admin (adminEvent, adminRegistration,
+│   │   │                    adminCheckin, adminUser, adminAuditLog, …)
+│   │   ├── services/        serializers, inventory holds, promo evaluation,
+│   │   │                    razorpay client, whatsapp client, audit log
+│   │   ├── routes/          one file per resource, mounted in routes/index.js
+│   │   ├── middleware/      auth (JWT + RBAC), upload, error handling
+│   │   ├── utils/           logger, ApiError, response envelope, qrcode,
+│   │   │                    ticketPdf, certificatePdf, csv
+│   │   ├── seed/            sample event + admin bootstrap
 │   │   └── dev/             mock API for DB-free frontend work
-│   └── tests/verify.js      verification suite
+│   └── tests/verify.js      98-check verification suite
 │
-├── frontend-public/
+├── frontend-public/         attendee-facing microsite
 │   └── src/
-│       ├── sections/        Hero, About, Speakers, Agenda, Tickets, Venue…
+│       ├── sections/        Hero, Speakers, Agenda, Tickets, Venue…
+│       ├── pages/           EventMicrosite, RegisterPage, TicketPage,
+│       │                    FeedbackPage
 │       ├── components/      header, footer, sticky CTA, share sheet, UI kit
-│       ├── lib/             api client, formatting, SEO, campaign tracking
-│       ├── pages/           EventMicrosite
+│       ├── lib/             api client, payments (Razorpay Checkout),
+│       │                    campaign tracking, formatting
 │       └── styles/          design tokens + global styles
 │
-├── nginx/                   production server config
-├── docs/                    API reference, roadmap
-└── docker-compose.yml
+├── frontend-admin/          staff-facing dashboard (separate app, same tokens)
+│   └── src/
+│       ├── pages/           EventEditor, TicketTypes, PromoCodes,
+│       │                    Registrations, Payments, CheckIn, Reports,
+│       │                    Feedback, Users, AuditLog
+│       ├── components/      sidebar shell, protected routes, UI kit
+│       └── lib/             per-resource API clients, auth context
+│
+├── scripts/                 backup-mongo.sh
+├── .github/workflows/       CI (verify, both frontend builds, docker build)
+├── nginx/                   production host reverse-proxy reference config
+├── docs/                    API reference, deployment, build checklist
+└── docker-compose.yml       mongo + api + web + admin
 ```
 
 ---
 
-
-
 ## Documentation
 
-- `[docs/API.md](docs/API.md)` — endpoint reference
-- `[docs/CONTENT-GUIDE.md](docs/CONTENT-GUIDE.md)` — what each microsite field controls
-- `[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)` — production deployment
-- `[docs/ROADMAP.md](docs/ROADMAP.md)` — module-by-module delivery plan
+- [`docs/API.md`](docs/API.md) — endpoint reference, admin role matrix
+- [`docs/CONTENT-GUIDE.md`](docs/CONTENT-GUIDE.md) — what each microsite field controls
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — production deployment (Docker-first)
+- [`docs/BUILD-CHECKLIST.md`](docs/BUILD-CHECKLIST.md) — module-by-module delivery log, with how each was verified
+- [`docs/SUPPORT.md`](docs/SUPPORT.md) — ops runbook for common support tasks
 
 ---
 

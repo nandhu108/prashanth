@@ -1,7 +1,10 @@
 # Deployment Guide
 
-Production deployment for the Module 1 platform. Full go-live hardening is
-Module 14; this gets a working, secured environment running now.
+Docker is the standard way to run this platform, in every environment from a
+laptop to production — the same `docker-compose.yml` that runs locally is
+what runs on the server, so "works on my machine" isn't a category of bug
+here. This guide covers the full stack (mongo, api, web, admin) as built
+through Module 14.
 
 ---
 
@@ -9,194 +12,198 @@ Module 14; this gets a working, secured environment running now.
 
 ```
                      ┌──────────────┐
-    Delegates  ──►   │    NGINX     │  :443  TLS termination
-                     │              │        static SPA + reverse proxy
-                     └──────┬───────┘
-                            │ /api/*
-                     ┌──────▼───────┐
-                     │  Node/Express│  :5000 (localhost only)
+    Delegates  ──►   │  Caddy/NGINX │  :443  TLS termination (host-level,
+                     │  (reverse    │        outside Docker — see §4)
+                     │   proxy)     │
                      └──────┬───────┘
                             │
-                     ┌──────▼───────┐
-                     │   MongoDB    │  :27017 (localhost only)
-                     └──────────────┘
+              ┌─────────────┼─────────────┬──────────────┐
+              │             │             │              │
+        ┌─────▼────┐  ┌─────▼────┐  ┌─────▼────┐   ┌─────▼────┐
+        │   web    │  │  admin   │  │   api    │   │  mongo   │
+        │ (NGINX,  │  │ (NGINX,  │  │(Node 20) │   │ (mongo:7)│
+        │  SPA)    │  │  SPA)    │  │  :5000   │   │  :27017  │
+        │  :80     │  │  :80     │  │(internal)│   │(internal)│
+        └──────────┘  └──────────┘  └────┬─────┘   └────┬─────┘
+                                          └──────────────┘
 ```
 
-Neither Node nor MongoDB should be reachable from the internet — only NGINX.
+`api` and `mongo` are never published to the host in production (drop their
+`ports:` mappings — see the prod override below); only `web` and `admin` are
+reachable, and only through the host reverse proxy that terminates TLS.
 
 ---
 
 ## 1. Server preparation
 
-Ubuntu 22.04 LTS, 2 vCPU / 4 GB RAM is comfortable for a few thousand delegates.
+Any host with Docker + Docker Compose v2 works — a 2 vCPU / 4 GB VM is
+comfortable for a few thousand delegates.
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs nginx
-sudo npm install -g pm2
-```
-
-### MongoDB
-
-```bash
-curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-  sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
-echo "deb [signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | \
-  sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-sudo apt update && sudo apt install -y mongodb-org
-sudo systemctl enable --now mongod
-```
-
-Confirm `/etc/mongod.conf` binds to localhost only:
-
-```yaml
-net:
-  port: 27017
-  bindIp: 127.0.0.1
-```
-
-**Enable authentication before go-live:**
-
-```bash
-mongosh
-> use admin
-> db.createUser({ user: "phAdmin", pwd: "<strong-password>",
-                  roles: [{ role: "userAdminAnyDatabase", db: "admin" }] })
-> use prashanth_events
-> db.createUser({ user: "phEvents", pwd: "<strong-password>",
-                  roles: [{ role: "readWrite", db: "prashanth_events" }] })
-```
-
-Then set `security.authorization: enabled` in `mongod.conf`, restart, and use:
-
-```
-MONGODB_URI=mongodb://phEvents:<password>@127.0.0.1:27017/prashanth_events
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER   # log out/in once for this to take effect
+docker compose version          # confirm v2 is available
 ```
 
 ### Firewall
 
+Only 80/443 (for the reverse proxy) and SSH need to be open — everything
+else stays on Docker's internal network.
+
 ```bash
 sudo ufw allow OpenSSH
-sudo ufw allow 'Nginx Full'
-sudo ufw enable        # 5000 and 27017 stay closed
+sudo ufw allow 80,443/tcp
+sudo ufw enable
 ```
 
 ---
 
-## 2. Deploy the API
+## 2. Configure and start the stack
 
 ```bash
-sudo mkdir -p /var/www/prashanth-events
-sudo chown -R $USER:$USER /var/www/prashanth-events
-cd /var/www/prashanth-events
+sudo mkdir -p /opt/prashanth-events
+sudo chown -R $USER:$USER /opt/prashanth-events
+cd /opt/prashanth-events
+git clone <this-repo> .
 
-# copy or clone the repository here
-cd backend
-npm ci --omit=dev
-cp .env.example .env
-nano .env
+cp backend/.env.example backend/.env
+nano backend/.env
 ```
 
-Production `.env`:
+Production `backend/.env` — see `backend/.env.example` for the full list;
+the ones that matter for go-live:
 
 ```ini
 NODE_ENV=production
-PORT=5000
-MONGODB_URI=mongodb://phEvents:<password>@127.0.0.1:27017/prashanth_events
-PUBLIC_SITE_URL=https://events.prashanthhospitals.com
-API_BASE_URL=https://events.prashanthhospitals.com
-CORS_ORIGINS=https://events.prashanthhospitals.com
-RATE_LIMIT_WINDOW_MINUTES=15
-RATE_LIMIT_MAX=300
+MONGODB_URI=mongodb://mongo:27017/prashanth_events   # unchanged — internal service name
+PUBLIC_SITE_URL=https://events.example.com
+API_BASE_URL=https://events.example.com
+ADMIN_SITE_URL=https://admin.events.example.com
+
+# Generate a real secret: openssl rand -hex 32
+JWT_SECRET=<generate-a-real-secret>
+JWT_EXPIRES_IN=7d
+
+ADMIN_BOOTSTRAP_EMAIL=admin@yourdomain.com
+ADMIN_BOOTSTRAP_PASSWORD=<set-a-strong-one-time-password>
+
+# Module 6 — leave blank until you have real Razorpay keys; payments
+# degrade gracefully (a clear "not configured" message) until then.
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+
+# Module 8 — same dev-safe degradation without these.
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_ACCESS_TOKEN=
 ```
 
-> `PUBLIC_SITE_URL` must be the real HTTPS domain — canonical URLs and social
-> share previews are generated from it.
+> `PUBLIC_SITE_URL` must be the real HTTPS domain — canonical URLs, QR
+> codes, WhatsApp ticket links and social share previews are all built
+> from it.
 
-Seed the first event, then start under PM2:
+Update `docker-compose.yml`'s `api`/`web`/`admin` `environment:` blocks (or
+switch them to read from `backend/.env` via `env_file`, as `api` already
+does) so `PUBLIC_SITE_URL`/`API_BASE_URL`/`ADMIN_SITE_URL`/`CORS_ORIGINS`
+match your real domains instead of the `localhost` defaults meant for local
+dev.
 
 ```bash
-npm run seed
-
-pm2 start src/server.js --name prashanth-api --time
-pm2 save
-pm2 startup        # run the command it prints
+docker compose up --build -d
+docker compose exec api npm run seed         # sample event — skip or edit for a real one
+docker compose exec api npm run seed:admin   # bootstraps the first superadmin
 ```
 
-Verify: `curl http://127.0.0.1:5000/api/v1/health` → `"database": "connected"`.
+Verify: `curl http://127.0.0.1:8080/api/v1/health` → `"database": "connected"`.
 
 ---
 
-## 3. Build and deploy the microsite
+## 3. TLS via a host-level reverse proxy
+
+Since `web` and `admin` are plain NGINX containers serving HTTP, put a TLS
+terminator in front. **Caddy** is the simplest option — automatic
+Let's Encrypt certificates, no manual certbot timers to manage.
+
+Install Caddy on the host (not in Docker, so it can bind 80/443 directly and
+survive `docker compose down`):
 
 ```bash
-cd /var/www/prashanth-events/frontend-public
-npm ci
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install caddy
 ```
 
-Create `.env.production`:
+`/etc/caddy/Caddyfile` — replace both domains with your real ones:
 
-```ini
-VITE_API_BASE_URL=
-VITE_DEFAULT_EVENT_SLUG=fertility-gynaecology-summit-2026
+```caddyfile
+events.example.com {
+    reverse_proxy localhost:8080
+}
+
+admin.events.example.com {
+    reverse_proxy localhost:8082
+}
 ```
-
-Leave `VITE_API_BASE_URL` **empty** — the SPA then calls `/api` on its own
-origin and NGINX proxies it. No CORS, no mixed-content issues.
 
 ```bash
-npm run build
-sudo mkdir -p /var/www/prashanth-events/public
-sudo cp -r dist/* /var/www/prashanth-events/public/
+sudo systemctl reload caddy
 ```
+
+That's it — Caddy issues and renews certificates automatically the first
+time each domain is requested. Point both domains' DNS `A` records at the
+server before reloading.
+
+**Alternative — NGINX + certbot:** if you'd rather use the host NGINX config
+already in this repo (`nginx/prashanth-events.conf`), point its
+`proxy_pass` at `http://127.0.0.1:8080` (and add an equivalent server block
+proxying to `:8082` for admin), then run
+`sudo certbot --nginx -d events.example.com -d admin.events.example.com`.
 
 ---
 
-## 4. NGINX
+## 4. Lock down the compose file for production
 
-```bash
-sudo cp nginx/prashanth-events.conf /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/prashanth-events.conf /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t
+The default `docker-compose.yml` publishes `mongo:27017` to the host for
+local convenience — **remove that in production** along with any direct
+public exposure of `api`. Either edit the file directly or layer an
+override:
+
+```yaml
+# docker-compose.prod.yml
+services:
+  mongo:
+    ports: []   # no longer published to the host
 ```
 
-Update `server_name` and the certificate paths to your domain first.
-
-### SSL
-
 ```bash
-sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d events.prashanthhospitals.com
-sudo systemctl reload nginx
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-Certbot installs a renewal timer automatically. Confirm with
-`sudo certbot renew --dry-run`.
+`api` already has no `ports:` mapping (only `expose: ['5000']`, internal to
+the compose network) — nothing to change there.
 
 ---
 
 ## 5. Post-deployment checks
 
 ```bash
-curl -I  https://events.prashanthhospitals.com            # 200, HSTS present
-curl -s  https://events.prashanthhospitals.com/api/v1/health
-curl -I  http://events.prashanthhospitals.com             # 301 to HTTPS
+curl -I  https://events.example.com                  # 200, HSTS present (Caddy sets this by default)
+curl -s  https://events.example.com/api/v1/health
+curl -I  https://admin.events.example.com
 ```
 
 Then in a browser:
 
-- [ ] Microsite loads and all sections render
-- [ ] Deep link `/events/<slug>` works on a **hard refresh** (SPA fallback)
-- [ ] Countdown shows the correct time
-- [ ] Passes show correct GST-inclusive prices
-- [ ] Map loads
-- [ ] Share the URL in WhatsApp — the preview card shows the title, description and image
-- [ ] Test on a real phone, not just a resized browser
-- [ ] Check an invalid slug returns the "Event not found" page, not a blank screen
+- [ ] Microsite loads and all sections render; deep link `/events/<slug>` works on a hard refresh
+- [ ] Admin login works at the admin domain; superadmin can reach every nav item
+- [ ] A `checkin_staff` test account is correctly restricted to Check-in only
+- [ ] Registration → (test-mode) payment → ticket → certificate flow works end to end
+- [ ] Share the microsite URL in WhatsApp — the preview card shows title/description/image
+- [ ] Check an invalid slug returns "Event not found", not a blank screen
+- [ ] Test on a real phone, not just a resized browser window
 
-Validate the structured data at
+Validate structured data at
 [search.google.com/test/rich-results](https://search.google.com/test/rich-results).
 
 ---
@@ -204,65 +211,65 @@ Validate the structured data at
 ## Updating a deployment
 
 ```bash
-cd /var/www/prashanth-events
+cd /opt/prashanth-events
 git pull
-
-cd backend && npm ci --omit=dev && pm2 reload prashanth-api
-
-cd ../frontend-public && npm ci && npm run build
-sudo rsync -a --delete dist/ /var/www/prashanth-events/public/
+docker compose up --build -d   # rebuilds only what changed; healthchecks gate the swap
 ```
 
-`pm2 reload` drains in-flight requests rather than dropping them — important
-once registrations and payments are live.
-
-`index.html` is served with `no-cache` and assets are content-hashed, so
-delegates never get a stale bundle after a deploy.
+No manual `rsync` or `pm2 reload` — Compose recreates each container from
+its fresh image and the built-in healthchecks (`api`'s `/health`, `mongo`'s
+`ping`) keep the old container up until the new one is actually ready.
 
 ---
 
 ## Backups
 
-Daily database dump, kept for 14 days:
+`scripts/backup-mongo.sh` wraps `docker compose exec mongo mongodump` —
+run it directly or on a cron:
 
 ```bash
-sudo tee /usr/local/bin/backup-events.sh > /dev/null <<'EOF'
-#!/bin/bash
-set -euo pipefail
-DIR=/var/backups/prashanth-events
-mkdir -p "$DIR"
-mongodump --uri="mongodb://phEvents:<password>@127.0.0.1:27017/prashanth_events" \
-          --archive="$DIR/events-$(date +%F).gz" --gzip
-find "$DIR" -name 'events-*.gz' -mtime +14 -delete
-EOF
-sudo chmod +x /usr/local/bin/backup-events.sh
-echo "0 2 * * * root /usr/local/bin/backup-events.sh" | sudo tee /etc/cron.d/prashanth-backup
+echo "0 2 * * * cd /opt/prashanth-events && ./scripts/backup-mongo.sh >> /var/log/prashanth-backup.log 2>&1" | sudo tee /etc/cron.d/prashanth-backup
 ```
 
-Copy backups off the server as well — a local-only backup does not survive
-losing the instance. **Test a restore before go-live**, not after an incident.
+Copy backups off the server too — a local-only backup does not survive
+losing the instance. **Test a restore before go-live**, not after an
+incident:
+
+```bash
+gunzip -c backups/events-2026-11-01.gz | docker compose exec -T mongo mongorestore --archive
+```
+
+The `uploads_data` Docker volume (event/speaker/sponsor images from the
+CMS) needs its own backup too — `docker run --rm -v prashanth-events_uploads_data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/uploads-$(date +%F).tar.gz -C /data .`
 
 ---
 
 ## Monitoring
 
 ```bash
-pm2 logs prashanth-api
-pm2 monit
-sudo tail -f /var/log/nginx/prashanth-events.error.log
+docker compose logs -f api
+docker compose ps               # healthcheck status for every service
 ```
 
-Point an uptime monitor at `/api/v1/health` — it reports database connectivity,
-so it catches a dropped Mongo connection even while NGINX still serves the page.
+Point an uptime monitor at `https://events.example.com/api/v1/health` — it
+reports database connectivity, so it catches a dropped Mongo connection
+even while the reverse proxy still serves the static page.
 
 ---
 
-## Notes for later modules
+## Notes on third-party integrations
 
-- **Module 6 (Payments):** add `https://checkout.razorpay.com` to the CSP
-  `script-src`. The webhook route is already configured with request buffering
-  disabled, which signature verification requires.
-- **Module 2 (CMS):** uploaded images need a persistent directory (or S3) plus a
-  matching NGINX `location`. Include it in the backup job.
-- **Scaling:** for a large event, run the API under `pm2 start src/server.js -i max`
-  (cluster mode). The app is stateless, so this works without changes.
+- **Payments (Module 6):** the app runs fully without Razorpay keys — order
+  creation returns a clear "not configured" message instead of erroring.
+  Once you have real keys, also register the webhook URL
+  (`https://events.example.com/api/v1/payments/webhook`) in the Razorpay
+  dashboard and set `RAZORPAY_WEBHOOK_SECRET` to match.
+- **WhatsApp (Module 8):** same dev-safe degradation. Sends are logged, not
+  sent, until `WHATSAPP_PHONE_NUMBER_ID`/`WHATSAPP_ACCESS_TOKEN` are set.
+- **Uploads (Module 2):** stored in the `uploads_data` Docker volume, served
+  by the `api` container at `/uploads` and proxied by `web`/`admin`'s NGINX
+  configs. Back it up alongside the database (see above).
+- **Scaling:** the API is stateless (all state is in Mongo), so for a large
+  event you can run more than one `api` replica behind the reverse proxy
+  without any code changes — `docker compose up -d --scale api=3` plus a
+  reverse-proxy upstream pointing at all three.

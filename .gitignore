@@ -26,3 +26,6 @@ Thumbs.db
 # Uploads (Module 2)
 uploads/
 public/uploads/
+
+# Local database backups (Module 14)
+backups/

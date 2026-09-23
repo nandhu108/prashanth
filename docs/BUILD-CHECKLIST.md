@@ -305,12 +305,29 @@ audit trail itself was left intact as the honest historical record it's
 meant to be. `tests/verify.js` route-guard coverage extended to
 `/admin/audit-log` (98/98 passing).
 
-## Module 14 — Deployment & Go-Live
+## Module 14 — Deployment & Go-Live ✅
 
-- [ ] docker-compose finalized (mongo/api/web/admin + uploads volume)
-- [ ] GitHub Actions CI (`verify` + builds)
-- [ ] `scripts/backup-mongo.sh`
-- [ ] `docs/DEPLOYMENT.md` updated
+- [x] docker-compose finalized (mongo/api/web/admin + uploads volume) — in
+      place since Foundation/Module 2, confirmed still correct here
+- [x] GitHub Actions CI (`.github/workflows/ci.yml`: backend verify+lint,
+      both frontend builds, then a full `docker compose build`)
+- [x] `scripts/backup-mongo.sh`
+- [x] `docs/DEPLOYMENT.md` rewritten Docker-first (the old version predated
+      Docker becoming the standard path and described a bare-metal PM2
+      setup with none of Modules 2-13's services)
+
+Verified for real, not just written: ran `docker compose build` locally —
+the exact command CI's final job runs — and all three custom images
+(api/web/admin) built cleanly. Ran the actual backup script against the
+live stack: dumped all 8 collections (14 registrations, 5 audit log
+entries, etc.) to a gzipped archive, then — since the deployment guide
+says "test a restore before go-live, not after an incident" — actually
+practiced that advice: restored the archive into a throwaway database
+(`restore_test`, via `mongorestore --nsFrom/--nsTo` so the live data was
+never touched), confirmed the document counts matched, and dropped the
+test database. `backend/npm run lint` (`node --check`) verified to pass
+before trusting it in the CI job. Test backup artifact removed;
+`backups/` added to `.gitignore`.
 
 ## Module 15 — Support
 
