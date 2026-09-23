@@ -23,57 +23,56 @@ function daysFromNow(days, hours = 9, minutes = 0) {
 }
 
 const eventData = {
-  title: 'Fertility & Gynaecology Summit 2026',
+  title: 'CIIM 2026',
   slug: SLUG,
-  tagline: 'Advances in Reproductive Medicine — Educate. Engage. Empower.',
+  tagline: '5th Annual Conference on Controversies in Infertility Management',
   summary:
-    'A one-day CME summit bringing together fertility specialists, gynaecologists and embryologists to discuss evidence-based advances in reproductive medicine, IVF outcomes and womens health.',
+    'The 5th annual CIIM, organised by Prashanth Fertility and Research Centre Pvt. Ltd. — an academic and scientific programme with high-impact debates, keynotes and a cultural fest, expected to draw 800+ delegates.',
   description:
-    'The Fertility & Gynaecology Summit 2026, hosted by the Department of Fertility & Gynaecology at Prashanth Hospitals, is designed for practising clinicians, postgraduates and allied fertility professionals.\n\nThe programme covers ovarian stimulation protocols, recurrent implantation failure, PCOS management, endometriosis surgery, fertility preservation and the ethics of assisted reproduction. Sessions combine didactic lectures with live case discussions and an interactive panel.\n\nDelegates receive CME credit points, a certificate of participation and full access to session resources.',
+    'Greetings from Dr. Geetha Haripriya, Chairperson, Prashanth Fertility and Research Centre Pvt. Ltd. We are delighted to welcome you to the prestigious 5th CIIM, to be held from November 21st – 22nd, 2026. CIIM 2026 will truly be an unforgettable conference for all who attend.\n\nThe conference aims to ideate, analyze, and share inventive, feasible, and implementable ways to encourage and disseminate knowledge, education, and research to make a high level of care available to women. The Organizing Committee is working hard to put together an educational and scientific program for what will be an academic extravaganza, packaged with cuisine to tantalize your taste buds, and a complete cultural fest.',
 
-  category: 'cme',
+  category: 'conference',
   mode: 'in-person',
   status: 'published',
 
-  startDate: daysFromNow(45, 8, 30),
-  endDate: daysFromNow(45, 17, 30),
+  startDate: new Date('2026-11-21T09:00:00+05:30'),
+  endDate: new Date('2026-11-22T17:30:00+05:30'),
   timezone: 'Asia/Kolkata',
 
   registrationOpensAt: daysFromNow(-10, 0, 0),
-  registrationClosesAt: daysFromNow(43, 23, 59),
+  registrationClosesAt: new Date('2026-11-20T23:59:00+05:30'),
 
-  capacity: 400,
+  capacity: 800,
   registeredCount: 182,
 
   organizer: {
-    name: 'Prashanth Hospitals',
-    department: 'Department of Fertility & Gynaecology',
+    name: 'Prashanth Fertility and Research Centre Pvt. Ltd.',
+    department: 'Prashanth Fertility',
     logoUrl: '/assets/logo-prashanth.svg',
     websiteUrl: 'https://www.prashanthhospitals.com',
   },
 
   venue: {
-    name: 'Prashanth Hospitals — Convention Hall',
-    addressLine1: 'Velappanchavadi, Chennai–Bengaluru Highway',
-    addressLine2: 'Near Poonamallee',
+    name: 'The Leela Palace',
+    addressLine1: '',
+    addressLine2: '',
     city: 'Chennai',
     state: 'Tamil Nadu',
-    pincode: '600077',
-    landmark: 'Opposite Velappanchavadi Bus Terminus',
-    mapEmbedUrl:
-      'https://www.google.com/maps?q=Prashanth+Hospitals+Velappanchavadi+Chennai&output=embed',
-    mapLink: 'https://maps.google.com/?q=Prashanth+Hospitals+Velappanchavadi+Chennai',
-    latitude: 13.0553,
-    longitude: 80.1257,
-    parkingInfo: 'Complimentary delegate parking available in the basement (Gate 2).',
+    pincode: '',
+    landmark: '',
+    mapEmbedUrl: 'https://www.google.com/maps?q=The+Leela+Palace+Chennai&output=embed',
+    mapLink: 'https://maps.google.com/?q=The+Leela+Palace+Chennai',
+    latitude: null,
+    longitude: null,
+    parkingInfo: '',
   },
 
   highlights: [
-    '6 CME credit points (TNMC accredited)',
-    '18 national faculty across 3 sessions',
-    'Live surgical video demonstrations',
-    'Certificate of participation for every delegate',
-    'Lunch and networking high tea included',
+    '800+ delegates: gynecologists, IVF specialists, embryologists and clinical researchers',
+    'High-impact scientific debates and academic keynotes',
+    'Premium culinary experiences',
+    'An exclusive cultural fest',
+    'Two days at The Leela Palace, Chennai — 21st & 22nd November 2026',
   ],
 
   speakers: [
@@ -147,8 +146,8 @@ const eventData = {
 
   agenda: [
     {
-      date: daysFromNow(45, 0, 0),
-      label: 'Summit Day — Convention Hall',
+      date: new Date('2026-11-21T00:00:00+05:30'),
+      label: 'Day 1 — The Leela Palace (sample programme)',
       items: [
         {
           startTime: '08:30',
@@ -346,15 +345,15 @@ const eventData = {
   },
 
   seo: {
-    metaTitle: 'Fertility & Gynaecology Summit 2026 | Prashanth Hospitals',
+    metaTitle: 'CIIM 2026 | Controversies in Infertility Management | Prashanth Fertility',
     metaDescription:
-      'A one-day CME summit on advances in reproductive medicine, IVF and womens health. 6 CME credit points. Chennai. Register now.',
+      '5th Annual Conference on Controversies in Infertility Management, 21–22 Nov 2026 at The Leela Palace, Chennai. Register now.',
     keywords: [
-      'fertility conference chennai',
-      'gynaecology CME 2026',
-      'IVF summit india',
-      'reproductive medicine conference',
-      'prashanth hospitals events',
+      'CIIM 2026',
+      'infertility conference chennai',
+      'IVF conference india',
+      'controversies in infertility management',
+      'prashanth fertility',
     ],
     ogImageUrl: '/assets/og-summit-2026.jpg',
     noIndex: false,
