@@ -83,4 +83,13 @@ const env = {
 env.isProduction = env.nodeEnv === 'production';
 env.isTest = env.nodeEnv === 'test';
 
+// A production container can never reach a database on its own loopback, so a
+// localhost URI there means MONGODB_URI was left unset or copied from a dev .env.
+if (env.isProduction && /^mongodb(\+srv)?:\/\/(?:[^@/]*@)?(localhost|127\.0\.0\.1|\[::1\])[:/]/i.test(env.mongoUri)) {
+  throw new Error(
+    'MONGODB_URI points at localhost in production. Set it to your Atlas connection string ' +
+      '(mongodb+srv://USER:PASS@cluster.mongodb.net/prashanth_events).'
+  );
+}
+
 module.exports = env;
