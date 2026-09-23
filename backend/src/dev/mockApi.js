@@ -44,6 +44,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/api/v1/health', (req, res) => {
+  res.json({ success: true, data: { status: 'ok', mode: 'demo', database: 'none' } });
+});
+
 app.get('/api/v1/public/events/:slug', async (req, res) => {
   await eventDoc.validate();
   res.json({
@@ -55,7 +59,20 @@ app.get('/api/v1/public/events/:slug', async (req, res) => {
   });
 });
 
-const PORT = process.env.MOCK_PORT || 5000;
+app.get('/api/v1/public/events/:slug/ticket-types', (req, res) => {
+  res.json({ success: true, data: { ticketTypes: ticketDocs.map(serializeTicketTypeForPublic) } });
+});
+
+// Everything else needs the real database; say so plainly instead of a bare 404.
+app.use('/api', (req, res) => {
+  res.status(503).json({
+    success: false,
+    error: { message: 'This is a read-only demo without a database. This feature is unavailable.', code: 'DEMO_MODE' },
+  });
+});
+
+// PORT is what hosts like Render inject; MOCK_PORT is for local `npm run mock`.
+const PORT = process.env.PORT || process.env.MOCK_PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Mock API listening on http://localhost:${PORT}`);
   console.log(`  GET /api/v1/public/events/${eventData.slug}`);

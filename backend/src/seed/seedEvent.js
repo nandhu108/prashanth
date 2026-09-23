@@ -345,7 +345,7 @@ const eventData = {
   },
 
   seo: {
-    metaTitle: 'CIIM 2026 | Controversies in Infertility Management | Prashanth Fertility',
+    metaTitle: 'CIIM 2026 | Controversies in Infertility Management',
     metaDescription:
       '5th Annual Conference on Controversies in Infertility Management, 21–22 Nov 2026 at The Leela Palace, Chennai. Register now.',
     keywords: [

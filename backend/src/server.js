@@ -1,5 +1,13 @@
 'use strict';
 
+// DEMO_MODE=true serves the read-only, database-free mock (public event page
+// only) so a hosted demo works without MongoDB. Must run before ./app loads,
+// because ./config/env requires MONGODB_URI in production.
+if (process.env.DEMO_MODE === 'true') {
+  require('./dev/mockApi');
+  return;
+}
+
 const app = require('./app');
 const env = require('./config/env');
 const { connectDatabase, ensureIndexes } = require('./config/database');
