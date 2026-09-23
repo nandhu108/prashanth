@@ -55,7 +55,7 @@ locally and in production (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)).
 | 12  | Feedback & Certificates   | **Done** |
 | 13  | Security & Access Control | **Done** |
 | 14  | Deployment & Go-Live      | **Done** |
-| 15  | Support                   | Next     |
+| 15  | Support                   | **Done** |
 
 
 ---

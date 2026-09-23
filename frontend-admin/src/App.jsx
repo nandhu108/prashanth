@@ -14,6 +14,7 @@ import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Feedback from './pages/Feedback';
 import AuditLog from './pages/AuditLog';
+import Help from './pages/Help';
 import ComingSoon from './pages/ComingSoon';
 
 function Shielded({ children, roles }) {
@@ -48,10 +49,7 @@ export default function App() {
             path="/audit-log"
             element={<Shielded roles={['superadmin']}><AuditLog /></Shielded>}
           />
-          <Route
-            path="/help"
-            element={<Shielded><ComingSoon title="Help" module="Module 15" /></Shielded>}
-          />
+          <Route path="/help" element={<Shielded><Help /></Shielded>} />
 
           <Route path="*" element={<Shielded><ComingSoon title="Not found" module="404" /></Shielded>} />
         </Routes>

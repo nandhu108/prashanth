@@ -329,10 +329,29 @@ test database. `backend/npm run lint` (`node --check`) verified to pass
 before trusting it in the CI job. Test backup artifact removed;
 `backups/` added to `.gitignore`.
 
-## Module 15 — Support
+## Module 15 — Support ✅
 
-- [ ] `docs/SUPPORT.md` ops runbook + staff FAQ
-- [ ] `frontend-admin` Help page
+- [x] `docs/SUPPORT.md` ops runbook (everyday tasks, emergency superadmin
+      recovery, restart/redeploy, troubleshooting, escalation criteria)
+- [x] `frontend-admin` Help page (role-aware quick-task cards + troubleshooting)
+
+Verified visually: logged in and confirmed all six task cards render and
+link to the correct pages, the four troubleshooting entries are readable
+and accurate against what was actually built in Modules 6/8 (payment/
+WhatsApp dev-safe degradation, hold-window sold-out confusion), zero
+console errors. Superadmin-only cards ("Add or reset an admin user", "See
+who changed what") use the same role-filter pattern already verified
+working in the sidebar nav (Module 10) and route guards throughout, so a
+dedicated re-test wasn't needed. No backend changes this module —
+`tests/verify.js` unaffected (98/98 passing).
+
+---
+
+## All 15 modules delivered ✅
+
+Foundation (auth/RBAC) plus all 13 build modules are complete, verified
+against the live Docker stack, and committed. See the final click-through
+demo checklist below.
 
 ## Final demo
 
